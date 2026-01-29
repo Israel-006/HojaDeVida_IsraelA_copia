@@ -1,0 +1,240 @@
+{% extends 'curriculum/base.html' %}
+{% load static %}
+
+{% block title %}Inicio | {{ perfil.nombres }} {{ perfil.apellidos }}{% endblock %}
+
+{% block content %}
+
+<div class="fade-in max-w-7xl mx-auto pb-20 pt-10 px-4 md:px-8 filter transition-all duration-300" id="main-content">
+    
+    <div class="mb-12 text-center md:text-left">
+        <h2 class="text-5xl md:text-6xl font-black italic uppercase tracking-wide text-[#1a1a1a] leading-none">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5A7D84] to-[#1a1a1a] pr-2">Inicio</span>
+        </h2>
+        <div class="h-2 w-24 bg-[#BBD2D6] mt-4 rounded-full mx-auto md:mx-0"></div>
+    </div>
+
+    <div class="space-y-10">
+        
+        <div class="bg-white p-8 md:p-12 rounded-[3.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-shadow duration-500">
+            <div class="flex flex-col-reverse md:flex-row gap-12 items-center md:items-start">
+                <div class="flex-grow w-full">
+                    <div class="border-b border-gray-50 pb-4 mb-8">
+                        <h3 class="text-2xl font-black uppercase tracking-[0.2em] text-[#1a1a1a]">Identidad Básica</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6">
+                        <div><label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Nombres</label><p class="text-xl font-medium text-gray-700 leading-tight">{{ perfil.nombres }}</p></div>
+                        <div><label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Apellidos</label><p class="text-xl font-medium text-gray-700 leading-tight">{{ perfil.apellidos }}</p></div>
+                        <div><label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Identificación</label><p class="text-xl font-medium text-gray-700">{{ perfil.cedula }}</p></div>
+                        <div><label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Nacionalidad</label><p class="text-xl font-medium text-gray-700">{{ perfil.nacionalidad }}</p></div>
+                        <div><label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Sexo</label><p class="text-xl font-medium text-gray-700">{{ perfil.sexo }}</p></div>
+                        <div><label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Estado Civil</label><p class="text-xl font-medium text-gray-700">{{ perfil.estado_civil }}</p></div>
+                        <div class="md:col-span-2"><label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Lugar & Fecha Nacimiento</label><p class="text-lg font-medium text-gray-700 leading-tight">{{ perfil.lugar_nacimiento }} <span class="text-[#BBD2D6] mx-2">|</span> {{ perfil.fecha_nacimiento }}</p></div>
+                    </div>
+                </div>
+                <div class="shrink-0">
+                    <div class="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
+                        <div class="steam-frame absolute inset-0 rounded-[2.5rem]"></div>
+                        <div class="relative z-10 w-[calc(100%-8px)] h-[calc(100%-8px)] bg-white rounded-[2.2rem] overflow-hidden border-4 border-white shadow-inner">
+                            {% if perfil.foto %}<img src="{{ perfil.foto.url }}" alt="{{ perfil.nombres }}" class="w-full h-full object-cover">{% else %}<div class="w-full h-full bg-gray-50 flex items-center justify-center text-gray-300"><i data-lucide="user" size="64" class="opacity-20"></i></div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-10">
+            <div class="bg-white p-8 md:p-10 rounded-[3.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-shadow duration-500 h-full">
+                <div class="border-b border-gray-50 pb-4 mb-6"><h3 class="text-2xl font-black uppercase tracking-[0.2em] text-[#1a1a1a]">Contacto</h3></div>
+                <div class="space-y-8">
+                    
+                    <div>
+                        <label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Teléfonos</label>
+                        <a href="tel:{{ perfil.telefono }}" class="block text-xl font-medium text-gray-700 hover:text-[#5A7D84] transition-colors" title="Llamar a {{ perfil.telefono }}">
+                            {{ perfil.telefono }}
+                        </a>
+                        {% if perfil.telefono_convencional %}
+                        <a href="tel:{{ perfil.telefono_convencional }}" class="block text-sm font-bold text-gray-400 mt-1 hover:text-[#5A7D84] transition-colors">
+                            {{ perfil.telefono_convencional }} (Convencional)
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Email & Web</label>
+                        
+                        <a href="mailto:{{ perfil.email }}" class="block text-xl font-medium text-gray-800 truncate mb-4 hover:text-[#5A7D84] transition-colors" title="Enviar correo a {{ perfil.email }}">
+                            {{ perfil.email }}
+                        </a>
+
+                        {% if perfil.sitio_web %}
+                        <a href="{{ perfil.sitio_web }}" target="_blank" class="inline-flex items-center gap-1 text-base font-bold text-gray-800 hover:text-[#5A7D84] transition-all group/link break-all">
+                            {{ perfil.sitio_web }}
+                            <i data-lucide="arrow-up-right" size="18" class="shrink-0 opacity-0 -ml-2 group-hover/link:opacity-100 group-hover/link:ml-0 transition-all"></i>
+                        </a>
+                        {% else %}
+                        <p class="text-sm font-bold text-gray-400">www.miportafolio.dev</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 md:p-10 rounded-[3.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-shadow duration-500 relative overflow-hidden group h-full">
+                <div class="absolute top-0 right-0 p-6 opacity-5 pointer-events-none"><i data-lucide="map" size="80" class="text-[#5A7D84]"></i></div>
+                <div class="border-b border-gray-50 pb-4 mb-6"><h3 class="text-2xl font-black uppercase tracking-[0.2em] text-[#1a1a1a]">Ubicación & Social</h3></div>
+                <div class="flex gap-4 mb-10 items-start">
+                    <div class="shrink-0 w-14 h-14 bg-[#F0F4F5] rounded-2xl flex items-center justify-center text-[#5A7D84]"><i data-lucide="map-pin" size="24"></i></div>
+                    <div><label class="text-sm font-black uppercase tracking-widest text-[#5A7D84] block mb-2">Domicilio</label><p class="text-lg font-medium text-gray-700 leading-tight">{{ perfil.direccion }}</p></div>
+                </div>
+                <div class="flex gap-3 mt-auto">
+                    {% if perfil.url_linkedin %}<a href="{{ perfil.url_linkedin }}" target="_blank" class="h-14 w-full bg-[#F0F4F5] rounded-2xl flex items-center justify-center text-gray-400 hover:text-[#0077b5] hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-gray-100 group/icon"><i data-lucide="linkedin" size="24" class="group-hover/icon:scale-110 transition-transform"></i></a>{% endif %}
+                    {% if perfil.url_github %}<a href="{{ perfil.url_github }}" target="_blank" class="h-14 w-full bg-[#F0F4F5] rounded-2xl flex items-center justify-center text-gray-400 hover:text-[#1a1a1a] hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-gray-100 group/icon"><i data-lucide="github" size="24" class="group-hover/icon:scale-110 transition-transform"></i></a>{% endif %}
+                    {% if perfil.url_instagram %}<a href="{{ perfil.url_instagram }}" target="_blank" class="h-14 w-full bg-[#F0F4F5] rounded-2xl flex items-center justify-center text-gray-400 hover:text-[#E1306C] hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-gray-100 group/icon"><i data-lucide="instagram" size="24" class="group-hover/icon:scale-110 transition-transform"></i></a>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-8 md:p-10 rounded-[3.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-xl transition-shadow duration-500 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-6 opacity-5 pointer-events-none"><i data-lucide="zap" size="100" class="text-[#5A7D84]"></i></div>
+            <div class="border-b border-gray-50 pb-4 mb-8"><h3 class="text-2xl font-black uppercase tracking-[0.2em] text-[#1a1a1a]">Accesos Directos</h3></div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                
+                <button onclick="openModal()" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32 border border-transparent hover:border-[#5A7D84] cursor-pointer">
+                    <i data-lucide="file-text" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3 transition-colors"></i>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Generar CV</span>
+                </button>
+
+                <a href="{% url 'experiencia' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32 border border-transparent hover:border-[#5A7D84]"><i data-lucide="briefcase" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3 transition-colors"></i><span class="text-[10px] font-black uppercase tracking-widest">Experiencia</span></a>
+                <a href="{% url 'educacion' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32 border border-transparent hover:border-[#5A7D84]"><i data-lucide="graduation-cap" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3 transition-colors"></i><span class="text-[10px] font-black uppercase tracking-widest">Educación</span></a>
+                <a href="{% url 'cursos' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32 border border-transparent hover:border-[#5A7D84]"><i data-lucide="book-open" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3 transition-colors"></i><span class="text-[10px] font-black uppercase tracking-widest">Cursos</span></a>
+                <a href="{% url 'reconocimientos' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32 border border-transparent hover:border-[#5A7D84]"><i data-lucide="trophy" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3 transition-colors"></i><span class="text-[10px] font-black uppercase tracking-widest">Logros</span></a>
+                <a href="{% url 'trabajos' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32 border border-transparent hover:border-[#5A7D84]"><i data-lucide="folder-git" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3 transition-colors"></i><span class="text-[10px] font-black uppercase tracking-widest">Proyectos</span></a>
+                <a href="{% url 'venta' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32 border border-transparent hover:border-[#5A7D84]"><i data-lucide="shopping-bag" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3 transition-colors"></i><span class="text-[10px] font-black uppercase tracking-widest">Venta</span></a>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="cvModal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+    
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+    
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl z-10 p-8 relative transform scale-95 transition-transform duration-300" id="modalPanel">
+        
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-black text-[#5A7D84] flex items-center gap-2">
+                <i data-lucide="sliders-horizontal" size="20"></i> Personalizar CV
+            </h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 transition-colors">
+                <i data-lucide="x" size="24"></i>
+            </button>
+        </div>
+
+        <form action="{% url 'generar_cv' %}" method="GET" target="_blank" onsubmit="setTimeout(closeModal, 1000)">
+            
+            <input type="hidden" name="origen" value="personalizado">
+
+            <div class="space-y-4 mb-8">
+                
+                <label class="flex items-center justify-between p-4 rounded-2xl bg-[#F0F4F5] cursor-pointer hover:bg-gray-100 transition-colors group">
+                    <span class="text-sm font-bold text-gray-700 group-hover:text-[#5A7D84] transition-colors">Incluir Experiencia Laboral</span>
+                    <div class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="experiencia" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5A7D84]"></div>
+                    </div>
+                </label>
+
+                <label class="flex items-center justify-between p-4 rounded-2xl bg-[#F0F4F5] cursor-pointer hover:bg-gray-100 transition-colors group">
+                    <span class="text-sm font-bold text-gray-700 group-hover:text-[#5A7D84] transition-colors">Incluir Cursos y Títulos</span>
+                    <div class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="educacion" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5A7D84]"></div>
+                    </div>
+                </label>
+
+                <label class="flex items-center justify-between p-4 rounded-2xl bg-[#F0F4F5] cursor-pointer hover:bg-gray-100 transition-colors group">
+                    <span class="text-sm font-bold text-gray-700 group-hover:text-[#5A7D84] transition-colors">Incluir Reconocimientos</span>
+                    <div class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="reconocimientos" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5A7D84]"></div>
+                    </div>
+                </label>
+
+                <label class="flex items-center justify-between p-4 rounded-2xl bg-[#F0F4F5] cursor-pointer hover:bg-gray-100 transition-colors group">
+                    <span class="text-sm font-bold text-gray-700 group-hover:text-[#5A7D84] transition-colors">Incluir Proyectos Acad./Lab.</span>
+                    <div class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="proyectos" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5A7D84]"></div>
+                    </div>
+                </label>
+
+                 <label class="flex items-center justify-between p-4 rounded-2xl bg-[#F0F4F5] border border-dashed border-[#BBD2D6] cursor-pointer hover:bg-gray-100 transition-colors group">
+                    <span class="text-sm font-bold text-gray-700 group-hover:text-[#5A7D84] transition-colors">Incluir Catálogo Garage</span>
+                    <div class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="venta" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5A7D84]"></div>
+                    </div>
+                </label>
+
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" onclick="closeModal()" class="w-1/3 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition-colors">
+                    Cerrar
+                </button>
+                <button type="submit" class="w-2/3 py-3 rounded-xl bg-[#5A7D84] text-white font-bold hover:bg-[#486369] transition-colors shadow-lg shadow-gray-400/50">
+                    Generar Documento PDF
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        const modal = document.getElementById('cvModal');
+        const content = document.getElementById('main-content');
+        modal.classList.remove('hidden');
+        content.classList.add('blur-sm');
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('cvModal');
+        const content = document.getElementById('main-content');
+        modal.classList.add('hidden');
+        content.classList.remove('blur-sm');
+    }
+</script>
+
+<style>
+    .fade-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Animación del Marco estilo Steam/Gamer */
+    .steam-frame {
+        position: absolute;
+        inset: -4px;
+        z-index: 0;
+        border-radius: 2.2rem;
+        background: conic-gradient(from 0deg, transparent 0deg, #BBD2D6 90deg, transparent 180deg, #5A7D84 270deg, transparent 360deg);
+        animation: spin-frame 4s linear infinite;
+    }
+    
+    .steam-frame::before {
+        content: '';
+        position: absolute;
+        inset: 4px;
+        border-radius: 1.8rem;
+        background: white;
+        z-index: 1;
+    }
+
+    @keyframes spin-frame {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}

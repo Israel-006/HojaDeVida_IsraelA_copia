@@ -1,0 +1,91 @@
+{% extends 'curriculum/base.html' %}
+{% load static %}
+
+{% block title %}Cursos y Certificaciones - {{ perfil.nombres }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-20 relative z-10">
+    
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[20%] left-[50%] -translate-x-1/2 w-[800px] h-[800px] bg-[#BBD2D6]/10 blur-[120px] rounded-full"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6">
+
+        <div class="text-center mb-16 fade-in">
+            <div class="flex items-center justify-center gap-4 mb-6">
+                <div class="h-1.5 w-16 bg-[#BBD2D6] rounded-full"></div>
+                <span class="text-gray-400 font-black tracking-[0.2em] text-sm uppercase">Formación Continua</span>
+                <div class="h-1.5 w-16 bg-[#BBD2D6] rounded-full"></div>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-black text-[#1a1a1a] mb-6 tracking-tighter">
+                CURSOS Y <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5A7D84] to-[#1a1a1a] italic pr-4">CERTIFICACIONES</span>
+            </h1>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for curso in cursos %}
+            <article class="bg-white rounded-[2rem] shadow-lg border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col h-full overflow-hidden">
+    
+    <div class="relative h-56 w-full bg-[#F0F4F5] overflow-hidden border-b border-gray-100 group">
+        {% if curso.imagen_portada %}
+            <img src="{{ curso.imagen_portada.url }}" alt="{{ curso.nombre_curso }}" class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110">
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <i data-lucide="eye" class="text-white w-8 h-8"></i>
+            </div>
+        {% else %}
+            <div class="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-3">
+                <i data-lucide="image-off" class="w-12 h-12 text-[#BBD2D6]"></i>
+                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Sin Imagen</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="p-8 flex flex-col flex-grow relative">
+        <div class="pl-4">
+            <h3 class="text-xl font-black text-[#1a1a1a] mb-3 leading-tight group-hover:text-[#5A7D84] transition-colors">
+                {{ curso.nombre_curso }}
+            </h3>
+            
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <i data-lucide="building-2" class="w-3 h-3 text-[#5A7D84]"></i> {{ curso.institucion }}
+            </p>
+
+            <p class="text-gray-500 text-sm leading-relaxed line-clamp-3 mb-6">
+                {% if curso.descripcion %}
+                    {{ curso.descripcion }}
+                {% else %}
+                    Duración: {{ curso.horas }}
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="mt-auto pl-4 pt-4 border-t border-gray-50 flex gap-4">
+            {% if curso.certificado_pdf %}
+            <a href="{{ curso.certificado_pdf.url }}" target="_blank" class="text-xs font-black text-[#1a1a1a] hover:text-[#5A7D84] flex items-center gap-1 transition-colors">
+                VER PDF <i data-lucide="file-check" class="w-3 h-3"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+            {% empty %}
+            <div class="col-span-full py-20 text-center">
+                <div class="inline-block p-6 rounded-full bg-gray-50 mb-6">
+                    <i data-lucide="image-off" class="w-12 h-12 text-gray-300"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-400">No hay certificados para mostrar</h3>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-20 text-center">
+            <a href="{% url 'inicio' %}" class="inline-flex items-center gap-2 text-gray-500 hover:text-[#5A7D84] font-bold transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Inicio
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

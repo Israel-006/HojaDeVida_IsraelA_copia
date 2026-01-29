@@ -1,0 +1,357 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hoja de Vida{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: rgb(236, 250, 252); 
+            color: #1a1a1a; 
+            margin: 0; 
+            font-size: 115%; 
+        }
+        
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        /* MENU DE VIDRIO ORIGINAL */
+        .glass-nav {
+            background: rgba(187, 210, 214, 0.98); 
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-active {
+            background-color: #1a1a1a !important;
+            color: white !important;
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .hamburger-btn {
+            background: rgba(187, 210, 214, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.5);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hamburger-btn:hover {
+            transform: scale(1.1);
+            background: rgba(187, 210, 214, 1);
+        }
+
+        .sidebar-closed { transform: translateX(-100%); }
+        .sidebar-open { transform: translateX(0); }
+
+        /* ================================================= */
+        /* ZONA DE EFECTOS ESPECIALES (MODO CIBERNÉTICO)     */
+        /* ================================================= */
+
+        /* 1. TEXTO ADMIN ARCOÍRIS (Velocidad Media) */
+        @keyframes rainbow-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .rainbow-text {
+            background: linear-gradient(
+                90deg, 
+                #00f3ff, #0066ff, #ff00ff, #00f3ff /* Paleta Tech */
+            );
+            background-size: 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow-flow 3s linear infinite;
+            font-weight: 900 !important;
+            filter: drop-shadow(0 0 5px rgba(0, 243, 255, 0.6));
+            transform: scale(1.15);
+            display: inline-block;
+        }
+
+        /* 2. REACTOR DE ENERGÍA (ESTILO ELECTRÓNICO) */
+        
+        /* Rotación rápida y constante */
+        @keyframes cyber-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Pulso eléctrico (Strobe effect) */
+        @keyframes tech-pulse {
+            0%, 100% { opacity: 1; filter: blur(10px); }
+            50% { opacity: 0.7; filter: blur(15px); }
+        }
+
+        .photo-rgb-frame {
+            position: relative;
+            background: #000 !important;
+            border: none !important;
+            box-shadow: 0 0 0 rgba(0,0,0,0) !important;
+            z-index: 10;
+        }
+
+        /* CAPA 1: Turbina de Alta Velocidad (Definida) */
+        .photo-rgb-frame::before {
+            content: '';
+            position: absolute;
+            top: -4px; left: -4px; right: -4px; bottom: -4px;
+            /* Gradiente "Tech": Transparente -> Cyan -> Magenta -> Transparente */
+            background: conic-gradient(
+                transparent 0deg, 
+                #00f3ff 90deg, 
+                #ff00ff 180deg, 
+                #00f3ff 270deg, 
+                transparent 360deg
+            );
+            border-radius: 50%;
+            z-index: -1;
+            /* Velocidad aumentada: 1.5s (Antes era 6s) */
+            animation: cyber-spin 1.5s linear infinite;
+        }
+
+        /* CAPA 2: Resplandor de Plasma (Glow pulsante) */
+        .photo-rgb-frame::after {
+            content: '';
+            position: absolute;
+            top: -8px; left: -8px; right: -8px; bottom: -8px;
+            background: conic-gradient(
+                transparent 0deg, 
+                #00f3ff 90deg, 
+                #ff00ff 180deg, 
+                #00f3ff 270deg, 
+                transparent 360deg
+            );
+            border-radius: 50%;
+            z-index: -2;
+            animation: cyber-spin 1.5s linear infinite, tech-pulse 0.5s ease-in-out infinite;
+        }
+        
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden relative">
+
+    <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()" class="hamburger-btn fixed top-6 left-6 z-[120] p-4 rounded-2xl text-gray-700 focus:outline-none group">
+        <i data-lucide="menu" size="28" class="group-hover:text-pink-600 transition-colors"></i>
+    </button>
+
+    <div id="menu-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity duration-500"></div>
+
+    <aside id="main-sidebar" class="fixed left-0 top-0 bottom-0 w-80 glass-nav flex flex-col items-center py-8 z-[100] transition-transform duration-500 shadow-2xl sidebar-closed">
+        
+        <div class="h-16 w-full mb-4 flex items-center justify-between px-6">
+            
+            <div class="flex items-center gap-2 group/rgb" title="Activar Modo Fiesta">
+                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover/rgb:text-pink-600 transition-colors">RGB</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="rgbSwitch" class="sr-only peer">
+                    <div class="w-8 h-4 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-pink-500 peer-checked:via-purple-500 peer-checked:to-indigo-500 shadow-inner"></div>
+                </label>
+            </div>
+
+            <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest cursor-pointer hover:text-pink-600 transition-colors p-2" onclick="toggleSidebar()">
+                <span class="border-b border-gray-400 pb-0.5">Cerrar Menú</span>
+            </span>
+        </div>
+
+        <div class="mb-10 flex flex-col items-center w-full shrink-0 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div class="mb-6 relative group cursor-pointer z-50">
+                <div id="photo-container" class="w-32 h-32 rounded-full p-1.5 border border-white/60 shadow-xl mx-auto bg-white/20 backdrop-blur-sm transition-all duration-300">
+                    {% if perfil and perfil.foto %}
+                        <img src="{{ perfil.foto.url }}" alt="Foto" class="w-full h-full object-cover rounded-full z-20 relative bg-white">
+                    {% else %}
+                        <div class="w-full h-full bg-[#1a1a1a] rounded-full flex items-center justify-center text-white font-black text-4xl shadow-inner z-20 relative">
+                            {% if perfil %}{{ perfil.nombres|first }}{% else %}V{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="text-center px-6">
+                <p class="font-black text-xl sm:text-2xl md:text-3xl tracking-tighter text-gray-800 uppercase leading-none transition-all duration-300">
+                    {% if perfil %}{{ perfil.nombres }}<br>{{ perfil.apellidos }}{% else %}Valeria<br>Meza{% endif %}
+                </p>
+                <div class="h-1 w-12 bg-gray-800 mx-auto mt-4 rounded-full"></div>
+            </div>
+        </div>
+
+        <ul id="nav-list" class="w-full space-y-4 flex-grow overflow-y-auto custom-scrollbar px-8 scroll-smooth flex flex-col overscroll-contain py-4">
+            {% with request.resolver_match.url_name as url_name %}
+            
+            <li><a href="{% url 'inicio' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'inicio' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Inicio</span></a></li>
+            <li><a href="{% url 'experiencia' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'experiencia' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Experiencia</span></a></li>
+            <li><a href="{% url 'educacion' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'educacion' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Educación</span></a></li>
+            <li><a href="{% url 'cursos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'cursos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Cursos</span></a></li>
+            <li><a href="{% url 'reconocimientos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'reconocimientos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Logros</span></a></li>
+            <li><a href="{% url 'trabajos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'trabajos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Trabajos</span></a></li>
+            <li><a href="{% url 'venta' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'venta' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Venta</span></a></li>
+
+            {% endwith %}
+        </ul>
+        
+        <div class="mt-auto pt-6 border-t border-gray-400/20 w-full px-8 text-center">
+            <a id="admin-link" href="/admin/" class="text-gray-400 hover:text-gray-800 text-[10px] font-bold uppercase tracking-widest transition-all duration-300">Admin</a>
+            <p class="text-[9px] font-black text-gray-400 uppercase tracking-tighter italic mt-2">© 2026</p>
+        </div>
+    </aside>
+
+    <main class="min-h-screen flex flex-col justify-center pl-0 md:pl-0 py-12 relative z-10 transition-all duration-500 w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('menu-overlay');
+            const hamBtn = document.getElementById('hamburger-btn');
+            
+            if (sidebar.classList.contains('sidebar-closed')) {
+                sidebar.classList.remove('sidebar-closed'); sidebar.classList.add('sidebar-open');
+                overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                hamBtn.classList.add('opacity-0', 'scale-0', 'pointer-events-none');
+            } else {
+                sidebar.classList.remove('sidebar-open'); sidebar.classList.add('sidebar-closed');
+                overlay.classList.add('opacity-0'); setTimeout(() => overlay.classList.add('hidden'), 500);
+                hamBtn.classList.remove('opacity-0', 'scale-0', 'pointer-events-none');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            const rgbSwitch = document.getElementById('rgbSwitch');
+            
+            // Referencias
+            const adminLink = document.getElementById('admin-link');
+            const photoContainer = document.getElementById('photo-container');
+            
+            let particlesArray;
+            
+            // 1. RECUPERAR ESTADO
+            let isRGB = localStorage.getItem('rgbMode') === 'true';
+
+            // 2. APLICAR ESTADO AL CARGAR
+            if(rgbSwitch) rgbSwitch.checked = isRGB;
+            
+            function toggleEffects(enable) {
+                if(enable) {
+                    if(photoContainer) photoContainer.classList.add('photo-rgb-frame');
+                    if(adminLink) adminLink.classList.add('rainbow-text');
+                } else {
+                    if(photoContainer) photoContainer.classList.remove('photo-rgb-frame');
+                    if(adminLink) adminLink.classList.remove('rainbow-text');
+                }
+            }
+
+            toggleEffects(isRGB);
+
+            /* --- PARTÍCULAS --- */
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                initParticles();
+            });
+
+            const normalColors = ['#BBD2D6', '#A0B4B8', '#D1E0E3'];
+
+            function getColor() {
+                if (isRGB) {
+                    return `hsl(${Math.random() * 360}, 100%, 50%)`;
+                } else {
+                    return normalColors[Math.floor(Math.random() * normalColors.length)];
+                }
+            }
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = (Math.random() * 0.4) - 0.2;
+                    this.speedY = (Math.random() * 0.4) - 0.2;
+                    this.color = getColor();
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                    if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                changeColorMode() {
+                    this.color = getColor();
+                }
+            }
+
+            function initParticles() {
+                particlesArray = [];
+                const numberOfParticles = (canvas.width * canvas.height) / 18000;
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particlesArray.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                    particlesArray[i].draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            if(rgbSwitch){
+                rgbSwitch.addEventListener('change', function() {
+                    isRGB = this.checked;
+                    localStorage.setItem('rgbMode', isRGB);
+                    particlesArray.forEach(p => p.changeColorMode());
+                    toggleEffects(isRGB);
+                });
+            }
+
+            initParticles();
+            animateParticles();
+        });
+    </script>
+</body>
+</html>

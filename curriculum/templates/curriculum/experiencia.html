@@ -1,0 +1,75 @@
+{% extends 'curriculum/base.html' %}
+{% load static %}
+
+{% block title %}Experiencia Laboral - {{ perfil.nombres }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-20 relative z-10">
+    
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[10%] left-[10%] w-[500px] h-[500px] bg-[#BBD2D6]/10 blur-[100px] rounded-full"></div>
+        <div class="absolute bottom-[10%] right-[10%] w-[400px] h-[400px] bg-[#5A7D84]/10 blur-[100px] rounded-full"></div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-6">
+
+        <div class="text-center mb-20 fade-in">
+            <div class="flex items-center justify-center gap-4 mb-6">
+                <div class="h-1.5 w-16 bg-[#BBD2D6] rounded-full"></div>
+                <span class="text-gray-400 font-black tracking-[0.2em] text-sm uppercase">Curriculum</span>
+                <div class="h-1.5 w-16 bg-[#BBD2D6] rounded-full"></div>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-black text-[#1a1a1a] mb-6 tracking-tighter">
+                EXPERIENCIA <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5A7D84] to-[#1a1a1a] italic pr-4">LABORAL</span>
+            </h1>
+        </div>
+
+        <div class="mb-12">
+            <div class="flex justify-center mb-12">
+                <span class="w-16 h-16 rounded-2xl bg-[#F0F4F5] flex items-center justify-center text-[#5A7D84] shadow-sm">
+                    <i data-lucide="briefcase" class="w-8 h-8"></i>
+                </span>
+            </div>
+
+            <div class="relative border-l-2 border-[#BBD2D6]/30 ml-3 md:ml-5 space-y-12 pb-4">
+                {% for exp in experiencias %}
+                <div class="relative pl-8 md:pl-12 group">
+                    <div class="absolute -left-[9px] top-8 w-5 h-5 rounded-full border-4 border-white bg-[#BBD2D6] group-hover:bg-[#5A7D84] group-hover:scale-125 transition-all duration-300 shadow-md z-10"></div>
+                    
+                    <div class="bg-white p-8 rounded-[2rem] shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 relative">
+                        <span class="inline-block px-3 py-1 bg-[#F0F4F5] text-[#5A7D84] text-[10px] font-black rounded-full uppercase tracking-wider mb-4">
+                            {{ exp.fecha_inicio }} - {{ exp.fecha_fin }}
+                        </span>
+                        
+                        <h3 class="text-xl md:text-2xl font-black text-[#1a1a1a] mb-2 leading-tight">{{ exp.cargo }}</h3>
+                        
+                        <p class="text-[#5A7D84] font-bold text-sm uppercase tracking-wide mb-5 flex items-center gap-2">
+                            <i data-lucide="building-2" class="w-4 h-4"></i> {{ exp.empresa }}
+                        </p>
+                        
+                        <p class="text-gray-600 leading-relaxed text-sm md:text-base border-t border-gray-50 pt-4">
+                            {{ exp.descripcion|linebreaksbr }}
+                        </p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="pl-8 text-center py-10">
+                    <div class="inline-block p-4 rounded-full bg-gray-50 mb-4">
+                        <i data-lucide="briefcase" class="w-8 h-8 text-gray-300"></i>
+                    </div>
+                    <p class="text-gray-400 italic">No hay registros de experiencia laboral aún.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mt-20 text-center">
+            <a href="{% url 'inicio' %}" class="inline-flex items-center gap-2 text-gray-500 hover:text-[#5A7D84] font-bold transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Inicio
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
