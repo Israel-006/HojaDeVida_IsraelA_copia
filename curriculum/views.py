@@ -1,35 +1,63 @@
 import os
+import requests  # <--- IMPORTANTE: Necesario para descargar los archivos de Cloudinary
 from io import BytesIO
 from django.conf import settings
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+from django.contrib.staticfiles import finders # Para buscar estáticos de forma segura
 from .models import (
     DatosPersonales, ExperienciaLaboral, EstudioRealizado, 
     CursoCapacitacion, Reconocimiento, ProductoLaboral, VentaGarage
 )
 from pypdf import PdfWriter, PdfReader
 
+# ==========================================
+# FUNCIÓN PARA GESTIONAR RUTAS (IMÁGENES Y CSS)
+# ==========================================
 def link_callback(uri, rel):
-    sUrl = settings.STATIC_URL
-    sRoot = settings.STATIC_ROOT
-    mUrl = settings.MEDIA_URL
-    mRoot = settings.MEDIA_ROOT
+    """
+    Ayuda a xhtml2pdf a encontrar las imágenes y estilos.
+    Soporta archivos locales (Static) y remotos (Cloudinary).
+    """
+    # 1. Si es una URL completa (ej: Cloudinary https://res.cloudinary...), déjala pasar
+    if uri.startswith('http'):
+        return uri
 
+    # 2. Configuración de rutas locales
+    sUrl = settings.STATIC_URL        # /static/
+    sRoot = settings.STATIC_ROOT      # carpeta staticfiles/
+    mUrl = settings.MEDIA_URL         # /media/
+    mRoot = settings.MEDIA_ROOT       # carpeta media/
+
+    # 3. Intentar convertir URL relativa a ruta absoluta del sistema
+    path = None
+    
+    # Caso A: Es un archivo Media (pero local)
     if uri.startswith(mUrl):
         path = os.path.join(mRoot, uri.replace(mUrl, ""))
+    
+    # Caso B: Es un archivo Estático (CSS, JS, Logos del sitio)
     elif uri.startswith(sUrl):
         path = os.path.join(sRoot, uri.replace(sUrl, ""))
-    else:
-        return uri
 
-    if not os.path.isfile(path):
-        return uri
-    return path
+    # 4. Verificar si el archivo existe en esa ruta construida
+    if path and os.path.isfile(path):
+        return path
+
+    # 5. SALVAVIDAS: Si no lo encontró en STATIC_ROOT, búscalo con los finders de Django
+    # (Esto ayuda si collectstatic falló o la ruta es distinta)
+    if uri.startswith(sUrl):
+        found_path = finders.find(uri.replace(sUrl, ""))
+        if found_path:
+            return found_path
+
+    # Si todo falla, devuelve la URI original (xhtml2pdf intentará resolverla)
+    return uri
 
 # ==========================================
-# VISTAS DE LA PÁGINA WEB (CORREGIDAS)
+# VISTAS DE LA PÁGINA WEB
 # ==========================================
 
 def inicio(request):
@@ -42,14 +70,12 @@ def perfil(request):
 
 def experiencia(request):
     perfil = DatosPersonales.objects.first()
-    # Orden descendente por ID (Lo último agregado primero)
     experiencias = ExperienciaLaboral.objects.all().order_by('-id')
     return render(request, 'curriculum/experiencia.html', {'perfil': perfil, 'experiencias': experiencias})
 
 def educacion(request):
     perfil = DatosPersonales.objects.first()
     estudios = EstudioRealizado.objects.all().order_by('-id')
-    # CORREGIDO: La clave ahora es 'educacion' para coincidir con el HTML {% for edu in educacion %}
     return render(request, 'curriculum/educacion.html', {'perfil': perfil, 'educacion': estudios})
 
 def cursos(request):
@@ -65,13 +91,11 @@ def reconocimientos(request):
 def trabajos(request):
     perfil = DatosPersonales.objects.first()
     proyectos = ProductoLaboral.objects.all().order_by('-id')
-    # CORREGIDO: La clave es 'trabajos' para coincidir con {% for trabajo in trabajos %}
     return render(request, 'curriculum/proyectos.html', {'perfil': perfil, 'trabajos': proyectos})
 
 def venta(request):
     perfil = DatosPersonales.objects.first()
     productos = VentaGarage.objects.all().order_by('-id')
-    # CORREGIDO: La clave es 'servicios' para coincidir con {% for item in servicios %}
     return render(request, 'curriculum/venta.html', {'perfil': perfil, 'servicios': productos})
 
 def contacto(request):
@@ -80,12 +104,12 @@ def contacto(request):
 
 
 # ==========================================
-# GENERADOR DE PDF
+# GENERADOR DE PDF (CORREGIDO PARA RENDER Y CLOUDINARY)
 # ==========================================
 def generar_cv(request):
     perfil = DatosPersonales.objects.first()
     
-    # 1. VERIFICAR EL ORIGEN
+    # 1. VERIFICAR EL ORIGEN Y FILTROS
     if request.GET.get('origen') == 'personalizado':
         incluir_exp = request.GET.get('experiencia') == 'on'
         incluir_edu = request.GET.get('educacion') == 'on'
@@ -93,13 +117,14 @@ def generar_cv(request):
         incluir_pro = request.GET.get('proyectos') == 'on'
         incluir_ven = request.GET.get('venta') == 'on'
     else:
+        # Por defecto incluir todo
         incluir_exp = True
         incluir_edu = True
         incluir_rec = True
         incluir_pro = True
         incluir_ven = True
 
-    # 2. FILTRAR DATOS
+    # 2. OBTENER DATOS DE LA BD
     experiencias = ExperienciaLaboral.objects.all().order_by('-id') if incluir_exp else []
     estudios = EstudioRealizado.objects.all().order_by('-id') if incluir_edu else []
     cursos_lista = CursoCapacitacion.objects.all().order_by('-id') if incluir_edu else []
@@ -107,15 +132,16 @@ def generar_cv(request):
     proyectos = ProductoLaboral.objects.all().order_by('-id') if incluir_pro else []
     ventas = VentaGarage.objects.all().order_by('-id') if incluir_ven else []
 
+    # Preparamos el escritor de PDF final
     pdf_writer = PdfWriter()
     template = get_template('curriculum/cv_pdf.html') 
 
-    # PASO 1: PARTE SUPERIOR
+    # --- PASO 1: GENERAR LA PARTE SUPERIOR (PERFIL, EXP, EDUCACIÓN) ---
     context_part1 = {
         'perfil': perfil,
         'experiencias': experiencias,
         'estudios': estudios,
-        'cursos': [], 
+        'cursos': [], # Los cursos van aparte intercalados
         'reconocimientos': [],
         'proyectos': [],
         'ventas': [],
@@ -125,15 +151,21 @@ def generar_cv(request):
     
     html_1 = template.render(context_part1)
     buffer_1 = BytesIO()
-    pisa.CreatePDF(html_1, dest=buffer_1, link_callback=link_callback)
+    # Generamos el PDF en memoria
+    pisa_status = pisa.CreatePDF(html_1, dest=buffer_1, link_callback=link_callback)
+    
+    if pisa_status.err:
+        return HttpResponse('Error generando la primera parte del PDF', status=500)
+
     buffer_1.seek(0)
     reader_1 = PdfReader(buffer_1)
     for page in reader_1.pages:
         pdf_writer.add_page(page)
 
-    # PASO 2: CURSOS INTERCALADOS
+    # --- PASO 2: INSERTAR CURSOS Y ADJUNTAR CERTIFICADOS (CORREGIDO) ---
     if cursos_lista:
         for curso in cursos_lista:
+            # A. Generar la página con la info del curso
             context_curso = {
                 'perfil': perfil,
                 'cursos': [curso],
@@ -149,17 +181,28 @@ def generar_cv(request):
             for page in reader_curso.pages:
                 pdf_writer.add_page(page)
 
+            # B. Adjuntar el PDF del certificado (DESDE LA NUBE)
             if curso.certificado_pdf:
                 try:
-                    pdf_path = curso.certificado_pdf.path
-                    if os.path.exists(pdf_path):
-                        reader_cert = PdfReader(pdf_path)
+                    # CORRECCIÓN CLAVE: No usamos .path, usamos la URL y descargamos el contenido
+                    pdf_url = curso.certificado_pdf.url
+                    response = requests.get(pdf_url)
+                    
+                    if response.status_code == 200:
+                        # Convertimos el contenido descargado en un archivo en memoria
+                        cert_buffer = BytesIO(response.content)
+                        reader_cert = PdfReader(cert_buffer)
+                        
                         for page in reader_cert.pages:
                             pdf_writer.add_page(page)
-                except Exception as e:
-                    print(f"Error adjuntando certificado: {e}")
+                    else:
+                        print(f"No se pudo descargar el certificado: {pdf_url}")
 
-    # PASO 3: PARTE INFERIOR
+                except Exception as e:
+                    # Capturamos error pero no rompemos el proceso, solo imprimimos en consola
+                    print(f"Error adjuntando certificado del curso {curso.nombre_curso}: {e}")
+
+    # --- PASO 3: PARTE INFERIOR (RECONOCIMIENTOS, PROYECTOS, ETC) ---
     if reconocimientos or proyectos or ventas:
         context_part3 = {
             'perfil': perfil,
@@ -181,11 +224,14 @@ def generar_cv(request):
         for page in reader_3.pages:
             pdf_writer.add_page(page)
 
+    # --- FINALIZAR Y ENVIAR ---
     final_buffer = BytesIO()
     pdf_writer.write(final_buffer)
     
     response = HttpResponse(final_buffer.getvalue(), content_type='application/pdf')
-    filename = f"CV_Personalizado_{perfil.nombres}.pdf"
+    # Limpiamos el nombre del archivo para evitar caracteres raros
+    safe_name = "".join([c for c in perfil.nombres if c.isalnum() or c in (' ', '_')]).strip()
+    filename = f"CV_Personalizado_{safe_name}.pdf"
     response['Content-Disposition'] = f'inline; filename="{filename}"'
     
     return response

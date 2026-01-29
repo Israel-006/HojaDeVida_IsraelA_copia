@@ -12,5 +12,6 @@ python manage.py collectstatic --no-input --clear
 # 3. Migraciones
 python manage.py migrate
 
-# 4. EJECUTAR EL SCRIPT DE ADMIN (Aquí está la magia)
-python create_admin.py
+# 4. EJECUTAR EL COMANDO NUEVO
+# Esto ejecutará el archivo que creamos en el paso 2
+python manage.py crear_superadmin
