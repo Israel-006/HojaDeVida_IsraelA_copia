@@ -12,7 +12,13 @@ class DatosPersonales(models.Model):
         ('Otro', 'Otro'),
     ]
     
-    
+    ESTADO_CIVIL_CHOICES = [
+        ('Soltero/a', 'Soltero/a'),  # <--- CAMBIA ESTA LÍNEA
+        ('Casado/a', 'Casado/a'),    # También puedes aprovechar para corregir estos si quieres
+        ('Divorciado/a', 'Divorciado/a'),
+        ('Viudo/a', 'Viudo/a'),
+        ('Unión Libre', 'Unión Libre'),
+    ]
 
     # Identidad Básica
     cedula = models.CharField(max_length=13, verbose_name="Cédula / ID")
