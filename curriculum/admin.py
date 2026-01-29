@@ -59,10 +59,35 @@ class EstudioRealizadoAdmin(admin.ModelAdmin):
 
 @admin.register(CursoCapacitacion)
 class CursoCapacitacionAdmin(admin.ModelAdmin):
-    list_display = ('nombre_curso', 'institucion', 'horas', 'fecha_realizacion', 'visible')
+    # Agregamos 'ver_portada' y 'ver_certificado' a la lista
+    list_display = ('nombre_curso', 'institucion', 'horas', 'fecha_realizacion', 'ver_portada', 'ver_certificado', 'visible')
     search_fields = ('nombre_curso', 'institucion')
     list_filter = ('fecha_realizacion',)
     list_editable = ('visible',)
+
+    # Función para mostrar la miniatura de la imagen
+    def ver_portada(self, obj):
+        # Nota: Uso 'imagen_portada' porque así lo llamas en tu HTML. 
+        # Si en tu models.py se llama diferente (ej: 'imagen'), cámbialo aquí.
+        if hasattr(obj, 'imagen_portada') and obj.imagen_portada:
+            return format_html(
+                '<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;" />',
+                obj.imagen_portada.url
+            )
+        return "Sin imagen"
+    
+    ver_portada.short_description = "Portada"
+
+    # Función para mostrar el botón del PDF
+    def ver_certificado(self, obj):
+        if obj.certificado_pdf:
+            return format_html(
+                '<a href="{}" target="_blank" style="background-color: #5A7D84; color: white; padding: 4px 10px; border-radius: 5px; text-decoration: none; font-weight: bold;">Ver PDF</a>',
+                obj.certificado_pdf.url
+            )
+        return "No hay PDF"
+    
+    ver_certificado.short_description = "Certificado"
 
 @admin.register(Reconocimiento)
 class ReconocimientoAdmin(admin.ModelAdmin):
