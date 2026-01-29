@@ -129,10 +129,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 # Static files (CSS, JavaScript, Images)
+# settings.py
+
+# ... (tu código anterior)
+
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    #STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+    # Tienes que quitar el '#' de la siguiente línea:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# ... (resto de tu código)
 
 
 # Media files (Las fotos que subes tú)
@@ -151,3 +159,6 @@ CLOUDINARY_STORAGE = {
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
+
+# Añade esto al final de settings.py para definir el tipo de ID por defecto
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
