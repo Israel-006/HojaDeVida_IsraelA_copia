@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -135,19 +135,39 @@ USE_TZ = True
 # ... (tu código anterior)
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
+# settings.py
 
-# Definir STATIC_ROOT siempre (no solo si DEBUG es False)
+# --- COPIA Y PEGA ESTO REEMPLAZANDO TU SECCIÓN DE STATIC FILES ---
+
+# 1. Rutas Estáticas
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Usar almacenamiento por defecto (sin compresión para evitar errores)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# 2. ALMACENAMIENTO: El secreto del éxito
+# Usamos el almacenamiento por defecto de Django.
+# Esto EVITA que intente comprimir archivos y falle tu despliegue.
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
-# --- CONFIGURACIÓN DE WHITENOISE ---
-# Esto fuerza a Whitenoise a servir los archivos incluso si algo más falla
-WHITENOISE_USE_FINDERS = True 
-WHITENOISE_AUTOREFRESH = True
+# Configuración para Django 4.2+ (está en tu archivo de ejemplo)
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
+# 3. WHITENOISE: La configuración mágica
+# Esto le dice a Whitenoise: "No comprimas, solo busca los archivos y sírvelos".
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True  # Útil para desarrollo, no estorba en producción
+
+# -------------------------------------------------------------
 
 # Media files (Las fotos que subes tú)
 MEDIA_URL = '/media/'
