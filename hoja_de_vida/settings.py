@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'cloudinary_storage',
     'django.contrib.staticfiles',
     'cloudinary',
@@ -135,10 +136,17 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# ... (resto de tu código)
+# Definir STATIC_ROOT siempre (no solo si DEBUG es False)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Usar almacenamiento por defecto (sin compresión para evitar errores)
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+# --- CONFIGURACIÓN DE WHITENOISE ---
+# Esto fuerza a Whitenoise a servir los archivos incluso si algo más falla
+WHITENOISE_USE_FINDERS = True 
+WHITENOISE_AUTOREFRESH = True
 
 
 # Media files (Las fotos que subes tú)
