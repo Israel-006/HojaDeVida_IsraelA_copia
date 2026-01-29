@@ -125,11 +125,24 @@ class EstudioRealizado(models.Model):
 # ==========================================
 # 4. CURSOS (Simplificado pero ordenado)
 # ==========================================
+# ==========================================
+# 4. CURSOS (Actualizado con imagen y PDF)
+# ==========================================
 class CursoCapacitacion(models.Model):
     nombre_curso = models.CharField(max_length=200)
     institucion = models.CharField(max_length=200)
-    horas = models.PositiveIntegerField(help_text="Cantidad de horas académicas") # Cambiado a número para poder sumar totales si quisieras
-    fecha_realizacion = models.DateField(default=timezone.now) # Agregado para ordenar
+    horas = models.PositiveIntegerField(help_text="Cantidad de horas académicas")
+    fecha_realizacion = models.DateField(default=timezone.now)
+    
+    # --- CAMPO NUEVO QUE FALTABA ---
+    imagen_portada = models.ImageField(
+        upload_to='cursos/portadas/', 
+        null=True, 
+        blank=True,
+        help_text="Imagen de portada o logo del curso (Opcional)"
+    )
+    # -------------------------------
+
     certificado_pdf = models.FileField(
         upload_to='cursos/certificados/', 
         null=True, 
@@ -140,7 +153,7 @@ class CursoCapacitacion(models.Model):
 
     class Meta:
         verbose_name_plural = "Cursos y Formaciones"
-        ordering = ['-fecha_realizacion']
+        ordering = ['-fecha_realizacion'] # Ordenar del más reciente al antiguo
 
     def __str__(self):
         return self.nombre_curso

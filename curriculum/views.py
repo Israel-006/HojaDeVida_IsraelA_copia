@@ -70,31 +70,37 @@ def perfil(request):
 
 def experiencia(request):
     perfil = DatosPersonales.objects.first()
-    experiencias = ExperienciaLaboral.objects.all().order_by('-id')
+    # ORDEN: Usamos el definido en models.py (-fecha_inicio)
+    experiencias = ExperienciaLaboral.objects.all()
     return render(request, 'curriculum/experiencia.html', {'perfil': perfil, 'experiencias': experiencias})
 
 def educacion(request):
     perfil = DatosPersonales.objects.first()
-    estudios = EstudioRealizado.objects.all().order_by('-id')
+    # ORDEN: Usamos el definido en models.py (-fecha_fin)
+    estudios = EstudioRealizado.objects.all()
     return render(request, 'curriculum/educacion.html', {'perfil': perfil, 'educacion': estudios})
 
 def cursos(request):
     perfil = DatosPersonales.objects.first()
-    cursos = CursoCapacitacion.objects.all().order_by('-id')
+    # ORDEN: Usamos el definido en models.py (-fecha_realizacion)
+    cursos = CursoCapacitacion.objects.all()
     return render(request, 'curriculum/cursos.html', {'perfil': perfil, 'cursos': cursos})
 
 def reconocimientos(request):
     perfil = DatosPersonales.objects.first()
-    reconocimientos = Reconocimiento.objects.all().order_by('-id')
+    # ORDEN: Usamos el definido en models.py (-fecha)
+    reconocimientos = Reconocimiento.objects.all()
     return render(request, 'curriculum/reconocimientos.html', {'perfil': perfil, 'reconocimientos': reconocimientos})
 
 def trabajos(request):
     perfil = DatosPersonales.objects.first()
-    proyectos = ProductoLaboral.objects.all().order_by('-id')
+    # ORDEN: Usamos el definido en models.py (-fecha)
+    proyectos = ProductoLaboral.objects.all()
     return render(request, 'curriculum/proyectos.html', {'perfil': perfil, 'trabajos': proyectos})
 
 def venta(request):
     perfil = DatosPersonales.objects.first()
+    # Ventas sí ordenamos por ID (último agregado)
     productos = VentaGarage.objects.all().order_by('-id')
     return render(request, 'curriculum/venta.html', {'perfil': perfil, 'servicios': productos})
 
@@ -124,12 +130,12 @@ def generar_cv(request):
         incluir_pro = True
         incluir_ven = True
 
-    # 2. OBTENER DATOS DE LA BD
-    experiencias = ExperienciaLaboral.objects.all().order_by('-id') if incluir_exp else []
-    estudios = EstudioRealizado.objects.all().order_by('-id') if incluir_edu else []
-    cursos_lista = CursoCapacitacion.objects.all().order_by('-id') if incluir_edu else []
-    reconocimientos = Reconocimiento.objects.all().order_by('-id') if incluir_rec else []
-    proyectos = ProductoLaboral.objects.all().order_by('-id') if incluir_pro else []
+    # 2. OBTENER DATOS DE LA BD (Respetando el orden cronológico de los Modelos)
+    experiencias = ExperienciaLaboral.objects.all() if incluir_exp else []
+    estudios = EstudioRealizado.objects.all() if incluir_edu else []
+    cursos_lista = CursoCapacitacion.objects.all() if incluir_edu else []
+    reconocimientos = Reconocimiento.objects.all() if incluir_rec else []
+    proyectos = ProductoLaboral.objects.all() if incluir_pro else []
     ventas = VentaGarage.objects.all().order_by('-id') if incluir_ven else []
 
     # Preparamos el escritor de PDF final
@@ -162,10 +168,10 @@ def generar_cv(request):
     for page in reader_1.pages:
         pdf_writer.add_page(page)
 
-    # --- PASO 2: INSERTAR CURSOS Y ADJUNTAR CERTIFICADOS (CORREGIDO) ---
+    # --- PASO 2: INSERTAR CURSOS Y ADJUNTAR CERTIFICADOS ---
     if cursos_lista:
         for curso in cursos_lista:
-            # A. Generar la página con la info del curso
+            # A. Generar la página con la info del curso (Título, horas, institución)
             context_curso = {
                 'perfil': perfil,
                 'cursos': [curso],
@@ -181,11 +187,13 @@ def generar_cv(request):
             for page in reader_curso.pages:
                 pdf_writer.add_page(page)
 
-            # B. Adjuntar el PDF del certificado (DESDE LA NUBE)
+            # B. Adjuntar el PDF del certificado (DESDE LA NUBE - CLOUDINARY)
             if curso.certificado_pdf:
                 try:
-                    # CORRECCIÓN CLAVE: No usamos .path, usamos la URL y descargamos el contenido
+                    # Usamos la URL pública de Cloudinary
                     pdf_url = curso.certificado_pdf.url
+                    
+                    # Descargamos el archivo en el momento
                     response = requests.get(pdf_url)
                     
                     if response.status_code == 200:
@@ -193,13 +201,14 @@ def generar_cv(request):
                         cert_buffer = BytesIO(response.content)
                         reader_cert = PdfReader(cert_buffer)
                         
+                        # Agregamos cada página del certificado al PDF final
                         for page in reader_cert.pages:
                             pdf_writer.add_page(page)
                     else:
                         print(f"No se pudo descargar el certificado: {pdf_url}")
 
                 except Exception as e:
-                    # Capturamos error pero no rompemos el proceso, solo imprimimos en consola
+                    # Si falla un certificado, el CV se genera igual, solo se salta ese archivo
                     print(f"Error adjuntando certificado del curso {curso.nombre_curso}: {e}")
 
     # --- PASO 3: PARTE INFERIOR (RECONOCIMIENTOS, PROYECTOS, ETC) ---

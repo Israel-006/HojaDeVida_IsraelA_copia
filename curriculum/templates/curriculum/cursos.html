@@ -28,48 +28,54 @@
             {% for curso in cursos %}
             <article class="bg-white rounded-[2rem] shadow-lg border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col h-full overflow-hidden">
     
-    <div class="relative h-56 w-full bg-[#F0F4F5] overflow-hidden border-b border-gray-100 group">
-        {% if curso.imagen_portada %}
-            <img src="{{ curso.imagen_portada.url }}" alt="{{ curso.nombre_curso }}" class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110">
-            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <i data-lucide="eye" class="text-white w-8 h-8"></i>
-            </div>
-        {% else %}
-            <div class="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-3">
-                <i data-lucide="image-off" class="w-12 h-12 text-[#BBD2D6]"></i>
-                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Sin Imagen</span>
-            </div>
-        {% endif %}
-    </div>
-
-    <div class="p-8 flex flex-col flex-grow relative">
-        <div class="pl-4">
-            <h3 class="text-xl font-black text-[#1a1a1a] mb-3 leading-tight group-hover:text-[#5A7D84] transition-colors">
-                {{ curso.nombre_curso }}
-            </h3>
-            
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <i data-lucide="building-2" class="w-3 h-3 text-[#5A7D84]"></i> {{ curso.institucion }}
-            </p>
-
-            <p class="text-gray-500 text-sm leading-relaxed line-clamp-3 mb-6">
-                {% if curso.descripcion %}
-                    {{ curso.descripcion }}
-                {% else %}
-                    Duración: {{ curso.horas }}
-                {% endif %}
-            </p>
-        </div>
-
-        <div class="mt-auto pl-4 pt-4 border-t border-gray-50 flex gap-4">
-            {% if curso.certificado_pdf %}
-            <a href="{{ curso.certificado_pdf.url }}" target="_blank" class="text-xs font-black text-[#1a1a1a] hover:text-[#5A7D84] flex items-center gap-1 transition-colors">
-                VER PDF <i data-lucide="file-check" class="w-3 h-3"></i>
-                        </a>
+                <div class="relative h-56 w-full bg-[#F0F4F5] overflow-hidden border-b border-gray-100 group cursor-pointer"
+                     {% if curso.imagen_portada %}onclick="openModal('{{ curso.imagen_portada.url }}', '{{ curso.nombre_curso }}')"{% endif %}>
+                    
+                    {% if curso.imagen_portada %}
+                        <img src="{{ curso.imagen_portada.url }}" alt="{{ curso.nombre_curso }}" class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <span class="text-white font-bold flex items-center gap-2">
+                                <i data-lucide="maximize-2" class="w-6 h-6"></i> Ver Imagen
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-3">
+                            <i data-lucide="image-off" class="w-12 h-12 text-[#BBD2D6]"></i>
+                            <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Sin Imagen</span>
+                        </div>
                     {% endif %}
                 </div>
-            </div>
-        </article>
+
+                <div class="p-8 flex flex-col flex-grow relative">
+                    <div class="pl-4">
+                        <h3 class="text-xl font-black text-[#1a1a1a] mb-3 leading-tight group-hover:text-[#5A7D84] transition-colors">
+                            {{ curso.nombre_curso }}
+                        </h3>
+                        
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i data-lucide="building-2" class="w-3 h-3 text-[#5A7D84]"></i> {{ curso.institucion }}
+                        </p>
+                        
+                        <p class="text-xs text-gray-400 mb-2">
+                            <i data-lucide="calendar" class="w-3 h-3 inline mr-1"></i> {{ curso.fecha_realizacion|date:"F Y" }}
+                        </p>
+
+                        <p class="text-gray-500 text-sm leading-relaxed line-clamp-3 mb-6">
+                             Duración: {{ curso.horas }} horas académicas.
+                        </p>
+                    </div>
+
+                    <div class="mt-auto pl-4 pt-4 border-t border-gray-50 flex gap-4">
+                        {% if curso.certificado_pdf %}
+                        <a href="{{ curso.certificado_pdf.url }}" target="_blank" class="text-xs font-black text-[#1a1a1a] hover:text-[#5A7D84] flex items-center gap-1 transition-colors">
+                            VER CERTIFICADO (PDF) <i data-lucide="file-check" class="w-3 h-3"></i>
+                        </a>
+                        {% else %}
+                        <span class="text-xs text-gray-300 font-bold">Sin certificado adjunto</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
             {% empty %}
             <div class="col-span-full py-20 text-center">
                 <div class="inline-block p-6 rounded-full bg-gray-50 mb-6">
@@ -88,4 +94,52 @@
 
     </div>
 </div>
+
+<div id="imageModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeModal()">
+    <div class="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center">
+        <button onclick="closeModal()" class="absolute -top-12 right-0 text-white hover:text-[#5A7D84] transition-colors">
+            <i data-lucide="x" class="w-10 h-10"></i>
+        </button>
+        
+        <img id="modalImage" src="" alt="Vista previa" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl border border-white/10">
+        
+        <p id="modalTitle" class="text-white mt-4 font-bold text-lg tracking-wide"></p>
+    </div>
+</div>
+
+<script>
+    function openModal(imageUrl, title) {
+        const modal = document.getElementById('imageModal');
+        const img = document.getElementById('modalImage');
+        const txt = document.getElementById('modalTitle');
+        
+        img.src = imageUrl;
+        txt.textContent = title;
+        
+        modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+        modal.classList.add('flex', 'opacity-100', 'pointer-events-auto');
+        document.body.style.overflow = 'hidden'; // Evitar scroll de fondo
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('imageModal');
+        
+        modal.classList.remove('opacity-100', 'pointer-events-auto');
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('modalImage').src = '';
+            document.body.style.overflow = 'auto'; // Restaurar scroll
+        }, 300);
+    }
+
+    // Cerrar con tecla ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    });
+</script>
 {% endblock %}
