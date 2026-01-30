@@ -129,6 +129,24 @@ def generar_cv(request):
         incluir_rec = True
         incluir_pro = True
         incluir_ven = True
+        
+    # Experiencia: Solo visibles y ordenadas por fecha inicio descendente
+    experiencias = ExperienciaLaboral.objects.filter(visible=True).order_by('-fecha_inicio') if incluir_exp else []
+    
+    # Estudios: Solo visibles y ordenados por fecha fin
+    estudios = EstudioRealizado.objects.filter(visible=True).order_by('-fecha_fin') if incluir_edu else []
+    
+    # Cursos: AQUÍ ESTABA EL ERROR. Usamos filter(visible=True) en vez de all()
+    cursos_lista = CursoCapacitacion.objects.filter(visible=True).order_by('-fecha_realizacion') if incluir_edu else []
+    
+    # Reconocimientos: Solo visibles
+    reconocimientos = Reconocimiento.objects.filter(visible=True).order_by('-fecha') if incluir_rec else []
+    
+    # Proyectos: Solo visibles
+    proyectos = ProductoLaboral.objects.filter(visible=True).order_by('-fecha') if incluir_pro else []
+    
+    # Ventas: Solo activos/visibles
+    ventas = VentaGarage.objects.filter(activo=True).order_by('-id') if incluir_ven else []
 
     # 2. OBTENER DATOS DE LA BD (Respetando el orden cronológico de los Modelos)
     experiencias = ExperienciaLaboral.objects.all() if incluir_exp else []
