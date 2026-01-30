@@ -29,19 +29,24 @@
             <article class="bg-white rounded-[2rem] shadow-lg border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col h-full overflow-hidden">
     
                 <div class="relative h-56 w-full bg-[#F0F4F5] overflow-hidden border-b border-gray-100 group cursor-pointer"
-                     {% if curso.imagen_portada %}onclick="openModal('{{ curso.imagen_portada.url }}', '{{ curso.nombre_curso }}')"{% endif %}>
+                     {% if curso.certificado_pdf %}
+                        onclick="openModal('{{ curso.get_preview_url }}', '{{ curso.nombre_curso }}')"
+                     {% endif %}>
                     
-                    {% if curso.imagen_portada %}
-                        <img src="{{ curso.imagen_portada.url }}" alt="{{ curso.nombre_curso }}" class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110">
+                    {% if curso.certificado_pdf %}
+                        <img src="{{ curso.get_preview_url }}" 
+                             alt="{{ curso.nombre_curso }}" 
+                             class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110">
+                        
                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                             <span class="text-white font-bold flex items-center gap-2">
-                                <i data-lucide="maximize-2" class="w-6 h-6"></i> Ver Imagen
+                                <i data-lucide="maximize-2" class="w-6 h-6"></i> Ver Certificado
                             </span>
                         </div>
                     {% else %}
                         <div class="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-3">
                             <i data-lucide="image-off" class="w-12 h-12 text-[#BBD2D6]"></i>
-                            <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Sin Imagen</span>
+                            <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Sin Certificado</span>
                         </div>
                     {% endif %}
                 </div>

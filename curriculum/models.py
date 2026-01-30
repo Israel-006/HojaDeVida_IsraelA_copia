@@ -137,6 +137,13 @@ class CursoCapacitacion(models.Model):
         help_text="Sube el certificado del curso en formato PDF"
     )
     visible = models.BooleanField(default=True)
+    @property
+    def get_preview_url(self):
+        if self.certificado_pdf and hasattr(self.certificado_pdf, 'url'):
+            # Truco de Cloudinary:
+            # Reemplazamos la extensión .pdf por .jpg para obtener la Primera Página como imagen
+            return self.certificado_pdf.url.replace('.pdf', '.jpg')
+        return None
 
     class Meta:
         verbose_name_plural = "Cursos y Formaciones"
