@@ -190,26 +190,27 @@ def generar_cv(request):
             # B. Adjuntar el PDF del certificado (DESDE LA NUBE - CLOUDINARY)
             if curso.certificado_pdf:
                 try:
-                    # Usamos la URL pública de Cloudinary
                     pdf_url = curso.certificado_pdf.url
-                    
-                    # Descargamos el archivo en el momento
-                    response = requests.get(pdf_url)
+                    # Agregamos timeout para que no se quede pensando eternamente
+                    response = requests.get(pdf_url, timeout=10)
                     
                     if response.status_code == 200:
-                        # Convertimos el contenido descargado en un archivo en memoria
-                        cert_buffer = BytesIO(response.content)
-                        reader_cert = PdfReader(cert_buffer)
-                        
-                        # Agregamos cada página del certificado al PDF final
-                        for page in reader_cert.pages:
-                            pdf_writer.add_page(page)
+                        try:
+                            cert_buffer = BytesIO(response.content)
+                            reader_cert = PdfReader(cert_buffer)
+                            
+                            # Validar que sea un PDF real antes de intentar leer páginas
+                            if len(reader_cert.pages) > 0:
+                                for page in reader_cert.pages:
+                                    pdf_writer.add_page(page)
+                        except Exception as e_pdf:
+                            print(f"El archivo descargado no es un PDF válido: {e_pdf}")
+                            # No hacemos 'raise', solo continuamos sin este certificado
                     else:
-                        print(f"No se pudo descargar el certificado: {pdf_url}")
+                        print(f"Cloudinary denegó el acceso (Posible 401/404): {pdf_url}")
 
                 except Exception as e:
-                    # Si falla un certificado, el CV se genera igual, solo se salta ese archivo
-                    print(f"Error adjuntando certificado del curso {curso.nombre_curso}: {e}")
+                    print(f"Error general adjuntando certificado {curso.nombre_curso}: {e}")
 
     # --- PASO 3: PARTE INFERIOR (RECONOCIMIENTOS, PROYECTOS, ETC) ---
     if reconocimientos or proyectos or ventas:
