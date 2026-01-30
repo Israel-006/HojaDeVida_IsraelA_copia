@@ -8,13 +8,6 @@
         @page {
             size: a4;
             margin: 1.5cm;
-            @frame footer_frame {
-                -pdf-frame-content: footerContent;
-                bottom: 1cm;
-                margin-left: 1.5cm;
-                margin-right: 1.5cm;
-                height: 1cm;
-            }
         }
         body { font-family: Helvetica, Arial, sans-serif; color: #333; font-size: 11pt; line-height: 1.4; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
@@ -204,9 +197,7 @@
     {% endfor %}
     {% endif %}
 
-    {% endif %} <div id="footerContent" style="text-align: center; color: #999; font-size: 9pt;">
-        Página <pdf:pagenumber> de <pdf:pagecount>
-    </div>
+    {% endif %} 
 
 </body>
 </html>

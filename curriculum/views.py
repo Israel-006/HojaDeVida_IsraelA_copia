@@ -12,6 +12,9 @@ from .models import (
     CursoCapacitacion, Reconocimiento, ProductoLaboral, VentaGarage
 )
 from pypdf import PdfWriter, PdfReader
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
 
 # ==========================================
 # FUNCIÓN PARA GESTIONAR RUTAS (IMÁGENES Y CSS)
@@ -90,6 +93,7 @@ def reconocimientos(request):
     perfil = DatosPersonales.objects.first()
     # ORDEN: Usamos el definido en models.py (-fecha)
     reconocimientos = Reconocimiento.objects.all()
+    reconocimientos = Reconocimiento.objects.filter(visible=True).order_by('-fecha')
     return render(request, 'curriculum/reconocimientos.html', {'perfil': perfil, 'reconocimientos': reconocimientos})
 
 def trabajos(request):
@@ -108,6 +112,50 @@ def contacto(request):
     perfil = DatosPersonales.objects.first()
     return render(request, 'curriculum/contacto.html', {'perfil': perfil})
 
+def numerar_paginas(pdf_writer):
+    """
+    Recibe un PdfWriter con todo el contenido mezclado,
+    cuenta las páginas reales y estampa "Página X de Y" al final.
+    """
+    # 1. Guardamos el contenido actual en memoria para leerlo
+    temp_buffer = BytesIO()
+    pdf_writer.write(temp_buffer)
+    temp_buffer.seek(0)
+    reader = PdfReader(temp_buffer)
+    total_pages = len(reader.pages)
+    
+    # 2. Creamos un nuevo escritor final
+    final_writer = PdfWriter()
+
+    # 3. Iteramos cada página existente
+    for i, page in enumerate(reader.pages):
+        # Crear un "lienzo" (canvas) temporal solo para el número
+        packet = BytesIO()
+        # Usamos A4. Si tus PDFs adjuntos son de otro tamaño, esto se pondrá al fondo centrado en A4
+        can = canvas.Canvas(packet, pagesize=A4)
+        
+        # Configuración del texto (Gris, pequeño, centrado)
+        can.setFillColorRGB(0.5, 0.5, 0.5) 
+        can.setFont("Helvetica", 9)
+        
+        # Texto: Página X de Total
+        texto = f"Página {i+1} de {total_pages}"
+        
+        # Dibujar centrado en la parte inferior (A4[0] es el ancho)
+        # 15mm desde abajo
+        can.drawCentredString(A4[0] / 2, 15 * mm, texto)
+        can.save()
+
+        # Mover al inicio del buffer del número
+        packet.seek(0)
+        number_pdf = PdfReader(packet)
+        page_number_layer = number_pdf.pages[0]
+
+        # 4. FUSIONAR: Pegamos el número encima de la página original
+        page.merge_page(page_number_layer)
+        final_writer.add_page(page)
+
+    return final_writer
 
 # ==========================================
 # GENERADOR DE PDF (CORREGIDO PARA RENDER Y CLOUDINARY)
@@ -129,7 +177,7 @@ def generar_cv(request):
         incluir_rec = True
         incluir_pro = True
         incluir_ven = True
-        
+
     # Experiencia: Solo visibles y ordenadas por fecha inicio descendente
     experiencias = ExperienciaLaboral.objects.filter(visible=True).order_by('-fecha_inicio') if incluir_exp else []
     
@@ -253,11 +301,17 @@ def generar_cv(request):
             pdf_writer.add_page(page)
 
     # --- FINALIZAR Y ENVIAR ---
+    try:
+        pdf_writer_numerado = numerar_paginas(pdf_writer)
+    except Exception as e:
+        print(f"Error numerando páginas: {e}")
+        pdf_writer_numerado = pdf_writer # Si falla, entregamos sin números (fallback)
+
     final_buffer = BytesIO()
-    pdf_writer.write(final_buffer)
+    pdf_writer_numerado.write(final_buffer)
     
     response = HttpResponse(final_buffer.getvalue(), content_type='application/pdf')
-    # Limpiamos el nombre del archivo para evitar caracteres raros
+    # Limpiamos el nombre del archivo
     safe_name = "".join([c for c in perfil.nombres if c.isalnum() or c in (' ', '_')]).strip()
     filename = f"CV_Personalizado_{safe_name}.pdf"
     response['Content-Disposition'] = f'inline; filename="{filename}"'
