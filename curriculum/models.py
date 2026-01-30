@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import cloudinary.utils
+from django.core.validators import FileExtensionValidator
 
 # ==========================================
 # 1. DATOS PERSONALES (Con lógica de privacidad)
@@ -190,15 +191,19 @@ class Reconocimiento(models.Model):
 class ProductoLaboral(models.Model):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField()
-    fecha = models.DateField(default=timezone.now) # Adaptado
-    registro_id = models.CharField(max_length=50, blank=True, null=True) # Hecho opcional
+    fecha = models.DateField(default=timezone.now)
+    registro_id = models.CharField(max_length=50, blank=True, null=True)
     
+    # --- AQUÍ ESTÁ EL CAMBIO ---
     archivo = models.FileField(
         upload_to='proyectos/archivos/', 
         null=True, 
         blank=True,
-        help_text="Documentación del proyecto"
+        # Agregamos el validador para restringir a solo PDF:
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
+        help_text="Documentación del proyecto (Solo archivos PDF)"
     )
+    
     url_demo = models.URLField(null=True, blank=True, help_text="Link al proyecto en vivo si existe")
     visible = models.BooleanField(default=True)
 
