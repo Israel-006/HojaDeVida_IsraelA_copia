@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+import cloudinary.utils
 
 # ==========================================
 # 1. DATOS PERSONALES (Con lógica de privacidad)
@@ -125,6 +126,7 @@ class EstudioRealizado(models.Model):
 # ==========================================
 # 4. CURSOS (Simplificado pero ordenado)
 # ==========================================
+
 class CursoCapacitacion(models.Model):
     nombre_curso = models.CharField(max_length=200)
     institucion = models.CharField(max_length=200)
@@ -137,20 +139,31 @@ class CursoCapacitacion(models.Model):
         help_text="Sube el certificado del curso en formato PDF"
     )
     visible = models.BooleanField(default=True)
-    @property
-    def get_preview_url(self):
-        if self.certificado_pdf and hasattr(self.certificado_pdf, 'url'):
-            # Truco de Cloudinary:
-            # Reemplazamos la extensión .pdf por .jpg para obtener la Primera Página como imagen
-            return self.certificado_pdf.url.replace('.pdf', '.jpg')
-        return None
-
     class Meta:
         verbose_name_plural = "Cursos y Formaciones"
         ordering = ['-fecha_realizacion']
 
     def __str__(self):
         return self.nombre_curso
+    @property
+    def get_preview_url(self):
+        if self.certificado_pdf and hasattr(self.certificado_pdf, 'name'):
+            try:
+                # Cloudinary necesita el 'public_id' (el nombre del archivo en la nube)
+                # Al usar FileField, 'self.certificado_pdf.name' suele tener ese valor.
+                
+                # Generamos una URL limpia solicitando formato JPG
+                url, options = cloudinary.utils.cloudinary_url(
+                    self.certificado_pdf.name,
+                    resource_type="image", # Forzamos a que lo trate como imagen
+                    format="jpg"           # Lo convertimos a JPG
+                )
+                return url
+            except Exception as e:
+                print(f"Error generando preview: {e}")
+                # Si falla, intentamos devolver la URL original como fallback
+                return self.certificado_pdf.url
+        return None
 
 
 # ==========================================
