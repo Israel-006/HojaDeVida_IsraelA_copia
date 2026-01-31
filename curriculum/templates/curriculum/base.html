@@ -22,6 +22,12 @@
             --icon-color: #5A7D84;
             --gradient-start: #5A7D84;
             --gradient-end: #1a1a1a;
+            
+            /* --- VARIABLES INDEPENDIENTES --- */
+            --sidebar-bg: rgba(187, 210, 214, 0.98); 
+            
+            /* CANAL A: Menú Lateral, Títulos Tarjetas y Subtítulos */
+            --card-titles-color: #1a1a1a; 
         }
 
         body { 
@@ -41,12 +47,60 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
 
         .glass-nav {
-            background: rgba(187, 210, 214, 0.98); 
+            background: var(--sidebar-bg) !important; 
             backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255, 255, 255, 0.5);
+            transition: background 0.3s ease;
         }
 
-        /* Overrides */
+        /* =========================================
+           CANAL A: CONTROL UNIFICADO DE TEXTOS
+           (Menú + Títulos H3 + Subtítulos Sección)
+           ========================================= */
+        
+        /* 1. Enlaces del menú lateral */
+        #nav-list a:not(.font-black) {
+            color: var(--card-titles-color) !important;
+            opacity: 0.8;
+        }
+        #nav-list a.font-black {
+            color: var(--card-titles-color) !important;
+            filter: brightness(0.8); 
+        }
+        
+        /* 2. Nombre del Perfil en Sidebar */
+        #main-sidebar p.font-black {
+            color: var(--card-titles-color) !important;
+        }
+        /* Rayita pequeña del sidebar bajo el nombre */
+        #main-sidebar .h-1.bg-gray-800 {
+            background-color: var(--card-titles-color) !important;
+        }
+
+        /* 3. Títulos H3 dentro de las tarjetas blancas (Ej: IDENTIDAD BÁSICA) */
+        main .bg-white h3 {
+            color: var(--card-titles-color) !important;
+        }
+
+        /* 4. SUBTÍTULOS DE SECCIÓN (Ej: CURRICULUM, PORTFOLIO, LOGROS...) */
+        /* Selecciona los textos pequeños en mayúsculas y espaciados */
+        main span.tracking-\[0\.2em\].uppercase {
+            color: var(--card-titles-color) !important;
+        }
+
+
+        /* =========================================
+           RAYAS DECORATIVAS (Vinculadas a Botones)
+           ========================================= */
+        /* Raya debajo del título grande y rayas laterales de subtítulos */
+        main div.h-2.w-24.bg-\[\#BBD2D6\],   
+        main div.h-1\.5.w-16.bg-\[\#BBD2D6\] 
+        {
+            background-color: var(--primary-color) !important;
+        }
+
+
+        /* Overrides Generales */
         .text-\[\#5A7D84\] { color: var(--primary-color) !important; }
         .bg-\[\#5A7D84\] { background-color: var(--primary-color) !important; }
         .hover\:bg-\[\#5A7D84\]:hover { background-color: var(--primary-color) !important; }
@@ -54,6 +108,8 @@
         .border-\[\#5A7D84\] { border-color: var(--primary-color) !important; }
         .hover\:border-\[\#5A7D84\]:hover { border-color: var(--primary-color) !important; }
         .bg-\[\#BBD2D6\] { background-color: var(--secondary-color) !important; }
+        
+        /* MANTENEMOS TUS GRADIENTES ORIGINALES EN LOS TÍTULOS GRANDES (H2) */
         .bg-gradient-to-r { background-image: linear-gradient(to right, var(--gradient-start), var(--gradient-end)) !important; }
 
         /* Iconos */
@@ -77,12 +133,13 @@
             color: transparent !important;
         }
 
-        /* Bordes Neón */
+        /* Bordes Neón - AUMENTADO A 4PX */
         @keyframes neon-border {
             0% { border-color: #ff0000; box-shadow: 0 0 5px #ff0000; } 50% { border-color: #00ffff; box-shadow: 0 0 5px #00ffff; } 100% { border-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
         }
         body.rgb-borders article, body.rgb-borders .bg-white.rounded-\[3\.5rem\], body.rgb-borders .bg-white.rounded-\[2\.5rem\] {
-            border: 2px solid transparent !important; animation: neon-border 3s linear infinite;
+            border: 4px solid transparent !important; /* AUMENTADO EL GROSOR AQUÍ */
+            animation: neon-border 3s linear infinite;
         }
 
         /* =========================================
@@ -95,13 +152,11 @@
         @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         @keyframes glitch-skew { 0% { transform: skewX(0deg); } 20% { transform: skewX(-5deg); } 40% { transform: skewX(5deg); } 60% { transform: skewX(-2deg); } 80% { transform: skewX(2deg); } 100% { transform: skewX(0deg); } }
 
-        /* Clase Base del Marco */
         @keyframes rgb-cycle {
             0% { filter: hue-rotate(0deg) contrast(1.2) brightness(1.2); }
             100% { filter: hue-rotate(360deg) contrast(1.2) brightness(1.2); }
         }
 
-        /* Clase Base del Marco */
         .frame-layer {
             position: absolute; inset: 0; z-index: 0;
             border-radius: 50% !important;
@@ -109,11 +164,9 @@
             transition: all 0.5s ease;
         }
         
-        /* Aplica esto si la clase se pone en el contenedor padre */
         .photo-rgb-active #active-frame {
             animation: rgb-cycle 2s linear infinite, spin-cw 3s linear infinite !important; 
-            /* Combinamos rgb-cycle con rotación para un efecto máximo */
-            filter: hue-rotate(0deg); /* Reset para que la animación tome control */
+            filter: hue-rotate(0deg);
         }
 
         /* --- ESTILOS 1-10 (Clásicos) --- */
@@ -257,12 +310,8 @@
         window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
         resizeCanvas();
 
-        // --- FUNCIONES GLOBALES CONECTADAS A SETTINGS ---
         window.setParticleShape = (shape) => { particleShape = shape; initParticles(); };
-        
-        // NUEVO: Función explícita para forzar el estado RGB desde settings
         window.setParticleRGB = (isRGB) => { particleRGB = isRGB; }; 
-        
         window.toggleParticleRGB = () => { particleRGB = !particleRGB; };
         
         window.updateParticleSettings = () => {
@@ -274,7 +323,6 @@
         
         window.initParticles = () => {
             const countInput = document.getElementById('particleCount');
-            // Si el input no existe aún, usa un default seguro
             const count = countInput ? parseInt(countInput.value) : 50;
             particlesArray = [];
             for (let i = 0; i < count; i++) {
@@ -305,7 +353,6 @@
                 if (particleRGB) {
                     ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
                 } else {
-                    // Obtener color actual dinámicamente por si cambió el tema
                     ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
                 }
 
@@ -351,10 +398,8 @@
         animate();
     });
     
-    // --- GESTIÓN DE MARCOS Y ANIMACIONES ---
     window.updateFrameState = function() {
         const switchEl = document.getElementById('frameRgbSwitch');
-        // Si el switch no existe (aún no cargó settings), asumimos false
         const isRgbActive = switchEl ? switchEl.checked : false;
         
         const frame = document.getElementById('active-frame');
@@ -362,33 +407,20 @@
         
         if(!frame) return; 
 
-        // 1. Limpiar clases previas
         for(let i=1; i<=20; i++) {
             frame.classList.remove('frame-style-' + i);
         }
         
-        // 2. Aplicar estilo seleccionado
         if (typeof currentFrameStyle !== 'undefined' && currentFrameStyle > 0) {
             frame.classList.add('frame-style-' + currentFrameStyle);
         } else {
             frame.classList.add('frame-style-1'); 
         }
         
-        // 3. APLICAR MODO RGB
-        // Quitamos la clase primero para asegurar que se reinicie si es necesario
         frame.classList.remove('photo-rgb-active'); 
         
         if(isRgbActive) {
-            // Agregamos la clase al contenedor padre del frame (.frame-layer está dentro o es el div)
-            // NOTA: En tu HTML el id="active-frame" TIENE la clase .frame-layer.
-            // Por tanto, aplicamos una clase padre o modificamos el selector CSS.
-            // Para que funcione con el CSS de arriba (.photo-rgb-active .frame-layer),
-            // necesitamos poner la clase .photo-rgb-active en el PADRE del frame layer
-            // O modificar el CSS para que sea .frame-layer.photo-rgb-active.
-            
-            // MÉTODO MÁS SEGURO SEGÚN TU HTML:
             document.getElementById('photo-container').classList.add('photo-rgb-active');
-            
             if(adminLink) adminLink.classList.add('rainbow-text');
         } else {
             document.getElementById('photo-container').classList.remove('photo-rgb-active');
@@ -401,7 +433,6 @@
         window.updateFrameState();
     };
 
-    // ESTA FUNCIÓN ES LA QUE CONECTA EL CLICK DEL SWITCH
     window.toggleFrameRGB = function() {
         window.updateFrameState();
     };

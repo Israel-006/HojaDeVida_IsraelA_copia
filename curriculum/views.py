@@ -160,10 +160,15 @@ def numerar_paginas(pdf_writer):
 # ==========================================
 # GENERADOR DE PDF (CORREGIDO PARA RENDER Y CLOUDINARY)
 # ==========================================
+# ... (Imports y función link_callback igual que antes) ...
+
+# ==========================================
+# GENERADOR DE PDF (ACTUALIZADO)
+# ==========================================
 def generar_cv(request):
     perfil = DatosPersonales.objects.first()
     
-    # 1. FILTROS Y OBTENCIÓN DE DATOS (Asegurando que traemos la fecha de venta)
+    # 1. FILTROS Y OBTENCIÓN DE DATOS
     incluir_exp = request.GET.get('experiencia') == 'on' if request.GET.get('origen') == 'personalizado' else True
     incluir_edu = request.GET.get('educacion') == 'on' if request.GET.get('origen') == 'personalizado' else True
     incluir_rec = request.GET.get('reconocimientos') == 'on' if request.GET.get('origen') == 'personalizado' else True
@@ -173,16 +178,17 @@ def generar_cv(request):
     experiencias = ExperienciaLaboral.objects.filter(visible=True) if incluir_exp else []
     estudios = EstudioRealizado.objects.filter(visible=True) if incluir_edu else []
     cursos_lista = CursoCapacitacion.objects.filter(visible=True).order_by('-fecha_realizacion') if incluir_edu else []
-    reconocimientos = Reconocimiento.objects.filter(visible=True) if incluir_rec else []
-    proyectos = ProductoLaboral.objects.filter(visible=True) if incluir_pro else []
     
-    # Ventas ordenadas por fecha de publicación (Punto 3)
+    # AHORA TAMBIÉN TRAEMOS RECONOCIMIENTOS CON CERTIFICADO
+    reconocimientos = Reconocimiento.objects.filter(visible=True).order_by('-fecha') if incluir_rec else []
+    
+    proyectos = ProductoLaboral.objects.filter(visible=True) if incluir_pro else []
     ventas = VentaGarage.objects.filter(activo=True).order_by('-fecha_publicacion') if incluir_ven else []
 
     pdf_writer = PdfWriter()
     template = get_template('curriculum/cv_pdf.html') 
 
-    # --- PASO 1: PARTE SUPERIOR (DATOS, EXP, EDUCACIÓN) ---
+    # --- PASO 1: PARTE SUPERIOR ---
     context_part1 = {
         'perfil': perfil,
         'experiencias': experiencias,
@@ -197,8 +203,7 @@ def generar_cv(request):
     for page in PdfReader(buffer_1).pages:
         pdf_writer.add_page(page)
 
-    # --- PASO 2: CURSOS EN CADENA (Punto 1 y 2 del rediseño) ---
-    # Esto quita el mensaje de "adjunto" y los pone seguidos con descripción y fechas
+    # --- PASO 2: CURSOS EN CADENA ---
     if cursos_lista:
         context_cursos = {
             'perfil': perfil,
@@ -213,7 +218,7 @@ def generar_cv(request):
         for page in PdfReader(buffer_c).pages:
             pdf_writer.add_page(page)
 
-    # --- PASO 3: PARTE INFERIOR (RECONOCIMIENTOS, PROYECTOS, VENTAS CON FECHA) ---
+    # --- PASO 3: PARTE INFERIOR ---
     if reconocimientos or proyectos or ventas:
         context_part3 = {
             'perfil': perfil,
@@ -230,14 +235,15 @@ def generar_cv(request):
         for page in PdfReader(buffer_3).pages:
             pdf_writer.add_page(page)
 
-    # --- PASO 4: ÍNDICE DE CERTIFICADOS (Nuevo requerimiento) ---
-    # Crea la lista numerada cronológica de "Certificados" para no dejar la hoja en blanco
-    tiene_certificados = any(curso.certificado_pdf for curso in cursos_lista)
+    # --- PASO 4: ÍNDICE DE CERTIFICADOS (Cursos + Reconocimientos) ---
+    tiene_certs_cursos = any(c.certificado_pdf for c in cursos_lista)
+    tiene_certs_reco = any(r.certificado_pdf for r in reconocimientos)
     
-    if cursos_lista and tiene_certificados:
+    if tiene_certs_cursos or tiene_certs_reco:
         context_idx = {
             'perfil': perfil,
             'cursos': cursos_lista,
+            'reconocimientos': reconocimientos, # Pasamos también reconocimientos
             'section_mode': 'certificates_index',
             'MEDIA_URL': settings.MEDIA_URL,
         }
@@ -246,12 +252,11 @@ def generar_cv(request):
         pisa.CreatePDF(html_idx, dest=buffer_idx, link_callback=link_callback)
         buffer_idx.seek(0)
         
-        # Leemos el índice generado
         reader_idx = PdfReader(buffer_idx)
         for page in reader_idx.pages:
-            # Solo añadimos páginas que no estén totalmente vacías (opcional pero seguro)
             pdf_writer.add_page(page)
-    # --- PASO 5: ADJUNTAR LOS PDFs ORIGINALES DESDE CLOUDINARY ---
+
+    # --- PASO 5: ADJUNTAR PDFs DE CURSOS ---
     for curso in cursos_lista:
         if curso.certificado_pdf:
             try:
@@ -263,7 +268,21 @@ def generar_cv(request):
                     for page in reader_cert.pages:
                         pdf_writer.add_page(page)
             except Exception as e:
-                print(f"Error adjuntando certificado de {curso.nombre_curso}: {e}")
+                print(f"Error adjuntando certificado curso {curso.nombre_curso}: {e}")
+
+    # --- PASO 5.5: ADJUNTAR PDFs DE RECONOCIMIENTOS (NUEVO) ---
+    for rec in reconocimientos:
+        if rec.certificado_pdf:
+            try:
+                pdf_url = rec.certificado_pdf.url
+                response_pdf = requests.get(pdf_url, timeout=10)
+                if response_pdf.status_code == 200:
+                    cert_buffer = BytesIO(response_pdf.content)
+                    reader_cert = PdfReader(cert_buffer)
+                    for page in reader_cert.pages:
+                        pdf_writer.add_page(page)
+            except Exception as e:
+                print(f"Error adjuntando certificado reconocimiento {rec.nombre}: {e}")
 
     # --- PASO 6: FINALIZAR Y ENVIAR ---
     try:

@@ -173,8 +173,17 @@ class CursoCapacitacion(models.Model):
 class Reconocimiento(models.Model):
     nombre = models.CharField(max_length=200, default="Reconocimiento no especificado")
     institucion = models.CharField(max_length=200, default="Institución no especificada")
-    fecha = models.DateField(default=timezone.now) # Adaptado a fecha real
+    fecha = models.DateField(default=timezone.now) 
     codigo_registro = models.CharField(max_length=50, blank=True, default="")
+    
+    # --- NUEVO CAMPO PARA SUBIR EL PDF ---
+    certificado_pdf = models.FileField(
+        upload_to='reconocimientos/certificados/', 
+        null=True, 
+        blank=True,
+        help_text="Sube el diploma o certificado en formato PDF"
+    )
+    
     visible = models.BooleanField(default=True)
 
     class Meta:

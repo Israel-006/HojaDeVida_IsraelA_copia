@@ -93,7 +93,23 @@
                     </div>
 
                     <div>
-                        <label class="text-xs text-gray-400 block mb-2">Color Botones/Textos</label>
+                        <label class="text-xs text-gray-400 block mb-2">Color Menú y Tarjetas</label>
+                        <div class="flex gap-3 items-center">
+                            <input type="color" id="cardTitlesColor" oninput="updateGlobalColors()" onchange="saveSettings()" value="#1a1a1a" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0">
+                            <span class="text-xs text-gray-500">Enlaces y H3</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-2">Color Menú Lateral (Fondo)</label>
+                        <div class="flex gap-3 items-center">
+                            <input type="color" id="sidebarColor" oninput="updateGlobalColors()" onchange="saveSettings()" value="#bbd2d6" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0">
+                            <span class="text-xs text-gray-500">Sidebar (Glass)</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-2">Color Botones/Acentos</label>
                         <div class="flex gap-3 items-center">
                             <input type="color" id="accentColor" oninput="updateGlobalColors()" onchange="saveSettings()" value="#5A7D84" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0">
                             <span class="text-xs text-gray-500">Principal</span>
@@ -272,6 +288,8 @@
         document.getElementById('iconRgbSwitch').checked = false;
         
         document.getElementById('bgColor').value = '#ecfafc'; 
+        document.getElementById('sidebarColor').value = '#bbd2d6'; 
+        document.getElementById('cardTitlesColor').value = '#1a1a1a'; 
         document.getElementById('accentColor').value = '#5A7D84';
         document.getElementById('iconColor').value = '#5A7D84';
         document.getElementById('gradStart').value = '#5A7D84';
@@ -295,8 +313,8 @@
         saveSettings();
     }
 
-    function toggleFrameRGB() {
-        if(window.toggleFrameRGB) window.toggleFrameRGB();
+    function toggleFrameRGB() { 
+        if(window.toggleFrameRGB) window.toggleFrameRGB(); 
     }
 
     function saveSettings() {
@@ -307,6 +325,8 @@
             pSize: document.getElementById('particleSize').value,
             pCount: document.getElementById('particleCount').value,
             bgColor: document.getElementById('bgColor').value,
+            sidebarColor: document.getElementById('sidebarColor').value, 
+            cardTitlesColor: document.getElementById('cardTitlesColor').value, 
             accent: document.getElementById('accentColor').value,
             iconColor: document.getElementById('iconColor').value,
             gradStart: document.getElementById('gradStart').value,
@@ -323,28 +343,25 @@
         localStorage.setItem('cvSettings', JSON.stringify(settings));
     }
 
-    // ... (El resto de tus funciones arriba se queda igual) ...
-
     function loadSettings() {
         const saved = localStorage.getItem('cvSettings');
         if (!saved) return;
 
         const s = JSON.parse(saved);
 
-        // 1. Restaurar Valores a los Inputs (Visualmente)
         if(s.pShape) currentShape = s.pShape;
         
-        const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+        const setVal = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
         const setCheck = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
 
-        // Partículas
         setCheck('particleRgbSwitch', s.pRgb);
         setVal('particleSpeed', s.pSpeed);
         setVal('particleSize', s.pSize);
         setVal('particleCount', s.pCount);
         
-        // Estilos
         setVal('bgColor', s.bgColor);
+        setVal('sidebarColor', s.sidebarColor || '#bbd2d6');
+        setVal('cardTitlesColor', s.cardTitlesColor || '#1a1a1a'); 
         setVal('accentColor', s.accent);
         setVal('iconColor', s.iconColor || '#5A7D84');
         setVal('gradStart', s.gradStart);
@@ -354,64 +371,49 @@
         setCheck('borderRgbSwitch', s.borderRgb);
         setCheck('iconRgbSwitch', s.iconRgb);
         
-        // Marcos
         setCheck('frameRgbSwitch', s.frameRgb);
         if(s.frameStyle) currentFrameStyle = s.frameStyle;
         
         setCheck('soundSwitch', s.sound);
 
-        // 2. APLICAR LÓGICA (Aquí forzamos que el cerebro le diga al cuerpo qué hacer)
         
-        // Forzar estilos CSS
         updateGlobalColors(); 
         toggleTitleRGB();
         toggleBorderRGB();
         toggleIconsRGB();
 
-        // Forzar Marco
-        // Importante: Asegurar que el botón correcto esté resaltado
         document.querySelectorAll('.frame-btn').forEach(btn => btn.classList.remove('border-pink-500', 'text-pink-400', 'bg-white/20'));
         const activeFrameBtn = document.getElementById('btn-frame-' + currentFrameStyle);
         if(activeFrameBtn) activeFrameBtn.classList.add('border-pink-500', 'text-pink-400', 'bg-white/20');
         
-        if(window.updateFrameDesign) window.updateFrameDesign(currentFrameStyle); // Aplica el estilo
-        if(window.toggleFrameRGB) window.toggleFrameRGB(); // Aplica el modo RGB si el check está true
+        if(window.updateFrameDesign) window.updateFrameDesign(currentFrameStyle); 
+        if(window.toggleFrameRGB) window.toggleFrameRGB(); 
         
-        // Forzar Partículas
-        // Seleccionamos visualmente el botón de forma
         document.querySelectorAll('.shape-btn').forEach(btn => btn.classList.remove('border-[#00f3ff]', 'bg-white/20'));
         const activeShapeBtn = document.getElementById('btn-shape-' + currentShape);
         if(activeShapeBtn) activeShapeBtn.classList.add('border-[#00f3ff]', 'bg-white/20');
 
-        // IMPORTANTE: Enviar datos a base.html
         if(window.setParticleShape) window.setParticleShape(currentShape);
-        if(window.setParticleRGB) window.setParticleRGB(s.pRgb); // Forzamos el valor booleano exacto
+        if(window.setParticleRGB) window.setParticleRGB(s.pRgb); 
         if(window.updateParticleSettings) window.updateParticleSettings();
         if(window.initParticles) window.initParticles();
     }
 
-    // Inicialización Robusta: Espera a que window.initParticles exista antes de cargar
     document.addEventListener('DOMContentLoaded', () => {
-        // Ocultar secciones iniciales
         document.getElementById('secStyles').style.maxHeight = '0';
         document.getElementById('secFrame').style.maxHeight = '0';
         document.getElementById('secSound').style.maxHeight = '0';
         
         if (typeof lucide !== 'undefined') lucide.createIcons();
         
-        // INTENTO DE CARGA SEGURO:
-        // Intentamos cargar settings. Si base.html no está listo (initParticles no existe),
-        // reintentamos cada 100ms hasta 10 veces.
         let attempts = 0;
         const tryLoad = setInterval(() => {
             attempts++;
             if (window.initParticles && window.updateFrameState) {
-                // Base.html está listo, cargamos y cancelamos el intervalo
                 loadSettings();
                 clearInterval(tryLoad);
                 console.log("Settings cargados correctamente en intento: " + attempts);
             } else if (attempts > 20) {
-                // Si tras 2 segundos no carga, forzamos la carga (por si acaso) y rendimos
                 loadSettings();
                 clearInterval(tryLoad);
             }
@@ -422,12 +424,18 @@
 
     function updateGlobalColors() {
         const bg = document.getElementById('bgColor').value; 
+        const sidebar = document.getElementById('sidebarColor').value; 
+        const cardTitles = document.getElementById('cardTitlesColor').value; 
+        
         const accent = document.getElementById('accentColor').value;
         const iconCol = document.getElementById('iconColor').value;
         const start = document.getElementById('gradStart').value;
         const end = document.getElementById('gradEnd').value;
 
         root.style.setProperty('--bg-color', bg);
+        root.style.setProperty('--sidebar-bg', sidebar + 'FA'); 
+        root.style.setProperty('--card-titles-color', cardTitles); 
+        
         root.style.setProperty('--primary-color', accent);
         root.style.setProperty('--icon-color', iconCol);
         root.style.setProperty('--gradient-start', start);
@@ -454,7 +462,6 @@
         document.body.classList.toggle('rgb-icons', isRGB);
     }
     
-    // Función llamada desde settings pero ejecutada en base.html (si existe)
     function toggleFrameRGB() { 
         if(window.toggleFrameRGB) window.toggleFrameRGB(); 
     }
@@ -474,7 +481,6 @@
             osc.type = 'sine';
             osc.frequency.setValueAtTime(400, now);
             osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
-            // VOLUMEN AUMENTADO: de 0.02 a 0.1
             gainNode.gain.setValueAtTime(0.1, now); 
             gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
             osc.start(now);
@@ -483,7 +489,6 @@
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(300, now);
             osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-            // VOLUMEN AUMENTADO: de 0.05 a 0.3
             gainNode.gain.setValueAtTime(0.4, now); 
             gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
             osc.start(now);

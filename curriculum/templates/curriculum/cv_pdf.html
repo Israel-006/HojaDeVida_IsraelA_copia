@@ -165,23 +165,34 @@ tr {
 {% endif %}
 
 {% if section_mode == 'certificates_index' %}
-    <div class="section-header"><div class="section-title">Anexo: Certificados</div></div>
+    <div class="section-header"><div class="section-title">Anexo: Documentación de Respaldo</div></div>
+    
     <table style="margin-left: 15px;">
         {% for curso in cursos %}
             {% if curso.certificado_pdf %}
             <tr>
-                <td width="5%" style="font-weight: bold;">{{ forloop.counter }}.</td>
-                <td width="95%" style="padding-bottom: 5px;">
-                    <div style="font-size: 11pt; font-weight: bold;">Certificado "{{ curso.nombre_curso }}"</div>
-                    <div style="font-size: 9pt; color: #5A7D84;">{{ curso.institucion }}</div>
+                <td width="5%" style="font-weight: bold; color: #5A7D84;">•</td>
+                <td width="95%" style="padding-bottom: 8px;">
+                    <div style="font-size: 11pt; font-weight: bold;">Certificado: {{ curso.nombre_curso }}</div>
+                    <div style="font-size: 9pt; color: #666;">Emitido por: {{ curso.institucion }}</div>
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+
+        {% for rec in reconocimientos %}
+            {% if rec.certificado_pdf %}
+            <tr>
+                <td width="5%" style="font-weight: bold; color: #D4AF37;">★</td>
+                <td width="95%" style="padding-bottom: 8px;">
+                    <div style="font-size: 11pt; font-weight: bold;">Premio/Reconocimiento: {{ rec.nombre }}</div>
+                    <div style="font-size: 9pt; color: #666;">Otorgado por: {{ rec.institucion }}</div>
                 </td>
             </tr>
             {% endif %}
         {% endfor %}
     </table>
 {% endif %}
-
-
 
 </body>
 </html>
