@@ -79,8 +79,9 @@ class ProductoLaboralAdmin(admin.ModelAdmin):
 @admin.register(VentaGarage)
 class VentaGarageAdmin(admin.ModelAdmin):
     # Aquí es muy útil ver el stock y precio rápido
-    list_display = ('nombre_producto', 'precio', 'estado', 'stock', 'activo')
+    list_display = ('nombre_producto', 'precio', 'estado', 'stock', 'fecha_publicacion', 'activo')
     list_filter = ('estado', 'activo')
     search_fields = ('nombre_producto', 'item_id', 'descripcion')
     list_editable = ('precio', 'stock', 'activo') # Edita precios y stock sin entrar al producto
     list_per_page = 20
+    readonly_fields = ('fecha_publicacion',)
