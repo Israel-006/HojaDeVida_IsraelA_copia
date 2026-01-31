@@ -105,7 +105,7 @@ def trabajos(request):
 def venta(request):
     perfil = DatosPersonales.objects.first()
     # Ventas sí ordenamos por ID (último agregado)
-    productos = VentaGarage.objects.all().order_by('-id')
+    productos = VentaGarage.objects.all().order_by('-fecha_publicacion')
     return render(request, 'curriculum/venta.html', {'perfil': perfil, 'servicios': productos})
 
 def contacto(request):
@@ -163,135 +163,105 @@ def numerar_paginas(pdf_writer):
 def generar_cv(request):
     perfil = DatosPersonales.objects.first()
     
-    # 1. VERIFICAR EL ORIGEN Y FILTROS
-    if request.GET.get('origen') == 'personalizado':
-        incluir_exp = request.GET.get('experiencia') == 'on'
-        incluir_edu = request.GET.get('educacion') == 'on'
-        incluir_rec = request.GET.get('reconocimientos') == 'on'
-        incluir_pro = request.GET.get('proyectos') == 'on'
-        incluir_ven = request.GET.get('venta') == 'on'
-    else:
-        # Por defecto incluir todo
-        incluir_exp = True
-        incluir_edu = True
-        incluir_rec = True
-        incluir_pro = True
-        incluir_ven = True
+    # 1. FILTROS Y OBTENCIÓN DE DATOS (Asegurando que traemos la fecha de venta)
+    incluir_exp = request.GET.get('experiencia') == 'on' if request.GET.get('origen') == 'personalizado' else True
+    incluir_edu = request.GET.get('educacion') == 'on' if request.GET.get('origen') == 'personalizado' else True
+    incluir_rec = request.GET.get('reconocimientos') == 'on' if request.GET.get('origen') == 'personalizado' else True
+    incluir_pro = request.GET.get('proyectos') == 'on' if request.GET.get('origen') == 'personalizado' else True
+    incluir_ven = request.GET.get('venta') == 'on' if request.GET.get('origen') == 'personalizado' else True
 
-    # Experiencia: Solo visibles y ordenadas por fecha inicio descendente
-    experiencias = ExperienciaLaboral.objects.filter(visible=True).order_by('-fecha_inicio') if incluir_exp else []
-    
-    # Estudios: Solo visibles y ordenados por fecha fin
-    estudios = EstudioRealizado.objects.filter(visible=True).order_by('-fecha_fin') if incluir_edu else []
-    
-    # Cursos: AQUÍ ESTABA EL ERROR. Usamos filter(visible=True) en vez de all()
+    experiencias = ExperienciaLaboral.objects.filter(visible=True) if incluir_exp else []
+    estudios = EstudioRealizado.objects.filter(visible=True) if incluir_edu else []
     cursos_lista = CursoCapacitacion.objects.filter(visible=True).order_by('-fecha_realizacion') if incluir_edu else []
+    reconocimientos = Reconocimiento.objects.filter(visible=True) if incluir_rec else []
+    proyectos = ProductoLaboral.objects.filter(visible=True) if incluir_pro else []
     
-    # Reconocimientos: Solo visibles
-    reconocimientos = Reconocimiento.objects.filter(visible=True).order_by('-fecha') if incluir_rec else []
-    
-    # Proyectos: Solo visibles
-    proyectos = ProductoLaboral.objects.filter(visible=True).order_by('-fecha') if incluir_pro else []
-    
-    # Ventas: Solo activos/visibles
-    ventas = VentaGarage.objects.filter(activo=True).order_by('-id') if incluir_ven else []
+    # Ventas ordenadas por fecha de publicación (Punto 3)
+    ventas = VentaGarage.objects.filter(activo=True).order_by('-fecha_publicacion') if incluir_ven else []
 
-    # 2. OBTENER DATOS DE LA BD (Respetando el orden cronológico de los Modelos)
-    experiencias = ExperienciaLaboral.objects.all() if incluir_exp else []
-    estudios = EstudioRealizado.objects.all() if incluir_edu else []
-    cursos_lista = CursoCapacitacion.objects.all() if incluir_edu else []
-    reconocimientos = Reconocimiento.objects.all() if incluir_rec else []
-    proyectos = ProductoLaboral.objects.all() if incluir_pro else []
-    ventas = VentaGarage.objects.all().order_by('-id') if incluir_ven else []
-
-    # Preparamos el escritor de PDF final
     pdf_writer = PdfWriter()
     template = get_template('curriculum/cv_pdf.html') 
 
-    # --- PASO 1: GENERAR LA PARTE SUPERIOR (PERFIL, EXP, EDUCACIÓN) ---
+    # --- PASO 1: PARTE SUPERIOR (DATOS, EXP, EDUCACIÓN) ---
     context_part1 = {
         'perfil': perfil,
         'experiencias': experiencias,
         'estudios': estudios,
-        'cursos': [], # Los cursos van aparte intercalados
-        'reconocimientos': [],
-        'proyectos': [],
-        'ventas': [],
         'section_mode': 'top',
         'MEDIA_URL': settings.MEDIA_URL,
     }
-    
     html_1 = template.render(context_part1)
     buffer_1 = BytesIO()
-    # Generamos el PDF en memoria
-    pisa_status = pisa.CreatePDF(html_1, dest=buffer_1, link_callback=link_callback)
-    
-    if pisa_status.err:
-        return HttpResponse('Error generando la primera parte del PDF', status=500)
-
+    pisa.CreatePDF(html_1, dest=buffer_1, link_callback=link_callback)
     buffer_1.seek(0)
-    reader_1 = PdfReader(buffer_1)
-    for page in reader_1.pages:
+    for page in PdfReader(buffer_1).pages:
         pdf_writer.add_page(page)
 
-    # --- PASO 2: INSERTAR CURSOS Y ADJUNTAR CERTIFICADOS ---
-    # --- PASO 2: SOLO TEXTO DE CURSOS ---
+    # --- PASO 2: CURSOS EN CADENA (Punto 1 y 2 del rediseño) ---
+    # Esto quita el mensaje de "adjunto" y los pone seguidos con descripción y fechas
     if cursos_lista:
-        context_cursos_texto = {
+        context_cursos = {
             'perfil': perfil,
             'cursos': cursos_lista,
-            'section_mode': 'course_single', # O un modo que solo liste nombres
+            'section_mode': 'courses_list', 
             'MEDIA_URL': settings.MEDIA_URL,
         }
-        html_cursos = template.render(context_cursos_texto)
-        buffer_cursos = BytesIO()
-        pisa.CreatePDF(html_cursos, dest=buffer_cursos, link_callback=link_callback)
-        buffer_cursos.seek(0)
-        reader_cursos = PdfReader(buffer_cursos)
-        for page in reader_cursos.pages:
+        html_c = template.render(context_cursos)
+        buffer_c = BytesIO()
+        pisa.CreatePDF(html_c, dest=buffer_c, link_callback=link_callback)
+        buffer_c.seek(0)
+        for page in PdfReader(buffer_c).pages:
             pdf_writer.add_page(page)
 
-    # --- PASO 3: PARTE INFERIOR (RECONOCIMIENTOS, PROYECTOS, ETC) ---
+    # --- PASO 3: PARTE INFERIOR (RECONOCIMIENTOS, PROYECTOS, VENTAS CON FECHA) ---
     if reconocimientos or proyectos or ventas:
         context_part3 = {
             'perfil': perfil,
-            'experiencias': [],
-            'estudios': [],
-            'cursos': [],
             'reconocimientos': reconocimientos,
             'proyectos': proyectos,
             'ventas': ventas,
             'section_mode': 'bottom',
             'MEDIA_URL': settings.MEDIA_URL,
         }
-        
         html_3 = template.render(context_part3)
         buffer_3 = BytesIO()
         pisa.CreatePDF(html_3, dest=buffer_3, link_callback=link_callback)
         buffer_3.seek(0)
-        reader_3 = PdfReader(buffer_3)
-        for page in reader_3.pages:
+        for page in PdfReader(buffer_3).pages:
             pdf_writer.add_page(page)
 
-    # --- PASO 4: ADJUNTAR CERTIFICADOS AL FINAL ---
-    # Recorremos los cursos para anexar sus PDFs originales al final de todo
+    # --- PASO 4: ÍNDICE DE CERTIFICADOS (Nuevo requerimiento) ---
+    # Crea la lista numerada cronológica de "Certificados" para no dejar la hoja en blanco
     if cursos_lista:
-        for curso in cursos_lista:
-            if curso.certificado_pdf:
-                try:
-                    pdf_url = curso.certificado_pdf.url
-                    response_pdf = requests.get(pdf_url, timeout=10)
-                    if response_pdf.status_code == 200:
-                        cert_buffer = BytesIO(response_pdf.content)
-                        reader_cert = PdfReader(cert_buffer)
-                        for page in reader_cert.pages:
-                            pdf_writer.add_page(page)
-                except Exception as e:
-                    print(f"Error adjuntando certificado de {curso.nombre_curso}: {e}")
+        context_idx = {
+            'perfil': perfil,
+            'cursos': cursos_lista,
+            'section_mode': 'certificates_index',
+            'MEDIA_URL': settings.MEDIA_URL,
+        }
+        html_idx = template.render(context_idx)
+        buffer_idx = BytesIO()
+        pisa.CreatePDF(html_idx, dest=buffer_idx, link_callback=link_callback)
+        buffer_idx.seek(0)
+        for page in PdfReader(buffer_idx).pages:
+            pdf_writer.add_page(page)
 
-    # --- PASO 5: FINALIZAR, NUMERAR Y ENVIAR ---
+    # --- PASO 5: ADJUNTAR LOS PDFs ORIGINALES DESDE CLOUDINARY ---
+    for curso in cursos_lista:
+        if curso.certificado_pdf:
+            try:
+                pdf_url = curso.certificado_pdf.url
+                response_pdf = requests.get(pdf_url, timeout=10)
+                if response_pdf.status_code == 200:
+                    cert_buffer = BytesIO(response_pdf.content)
+                    reader_cert = PdfReader(cert_buffer)
+                    for page in reader_cert.pages:
+                        pdf_writer.add_page(page)
+            except Exception as e:
+                print(f"Error adjuntando certificado de {curso.nombre_curso}: {e}")
+
+    # --- PASO 6: FINALIZAR Y ENVIAR ---
     try:
-        # Esto ahora contará todas las páginas, incluidos los certificados anexados
         pdf_writer_numerado = numerar_paginas(pdf_writer)
     except Exception as e:
         print(f"Error numerando páginas: {e}")
