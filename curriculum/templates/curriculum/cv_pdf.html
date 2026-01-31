@@ -43,19 +43,18 @@
             margin-top: 100px; /* Para centrarlo un poco en la hoja */
             text-align: center;
         }
-        html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-    /* Evita que las tablas se corten mal y generen hojas extra */
-    table {
-        page-break-inside: auto;
-    }
-    tr {
-        page-break-inside: avoid;
-        page-break-after: auto;
-    }
+        /* cv_pdf.html - Ajuste de Estilos */
+html, body {
+    height: auto; /* Cambiado de 100% para evitar hojas extra */
+    margin: 0;
+    padding: 0;
+}
+table {
+    page-break-inside: auto;
+}
+tr {
+    page-break-inside: avoid;
+}
     </style>
 </head>
 <body>
@@ -129,20 +128,15 @@
     {% if section_mode == 'courses_list' %}
     <div class="section-header"><div class="section-title">Formación Continua</div></div>
     {% for curso in cursos %}
-    <table class="item-row" keep-together="always">
+    <table class="item-row" style="margin-bottom: 8px;">
         <tr>
             <td width="75%">
                 <div class="item-title">{{ curso.nombre_curso }}</div>
-                <div class="item-subtitle" style="color: #666;">{{ curso.institucion }}</div>
+                <div class="item-subtitle">{{ curso.institucion }}</div>
             </td>
-            <td width="25%" align="right" valign="top">
+            <td width="25%" align="right">
                 <div class="date-badge">{{ curso.fecha_realizacion|date:"m/Y" }}</div>
                 <div style="font-size: 8pt; color: #5A7D84;">{{ curso.horas }} Horas</div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <div class="description">{{ curso.descripcion|linebreaksbr }}</div>
             </td>
         </tr>
     </table>
@@ -172,14 +166,12 @@
 
 {% if section_mode == 'certificates_index' %}
     <div class="section-header"><div class="section-title">Anexo: Certificados</div></div>
-    <p style="font-size: 10pt; color: #666; margin-bottom: 20px;">Listado de acreditaciones originales adjuntas:</p>
-    
-    <table style="margin-left: 20px;">
+    <table style="margin-left: 15px;">
         {% for curso in cursos %}
             {% if curso.certificado_pdf %}
             <tr>
-                <td width="5%" valign="top" style="padding-bottom: 10px; font-weight: bold;">{{ forloop.counter }}.</td>
-                <td width="95%" style="padding-bottom: 10px;">
+                <td width="5%" style="font-weight: bold;">{{ forloop.counter }}.</td>
+                <td width="95%" style="padding-bottom: 5px;">
                     <div style="font-size: 11pt; font-weight: bold;">Certificado "{{ curso.nombre_curso }}"</div>
                     <div style="font-size: 9pt; color: #5A7D84;">{{ curso.institucion }}</div>
                 </td>
@@ -187,7 +179,7 @@
             {% endif %}
         {% endfor %}
     </table>
-    {% endif %}
+{% endif %}
 
 
 
