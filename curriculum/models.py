@@ -232,7 +232,10 @@ class VentaGarage(models.Model):
     item_id = models.CharField(max_length=50, unique=True) # Agregado unique para evitar duplicados
     imagen = models.ImageField(upload_to='venta/', null=True, blank=True)
     stock = models.PositiveIntegerField(default=1, help_text="Cantidad disponible")
-    fecha_publicacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Publicación")
+    fecha_publicacion = models.DateTimeField(
+        default=timezone.now, 
+        verbose_name="Fecha de Publicación"
+    )
     activo = models.BooleanField(default=True, help_text="Desactívalo para ocultarlo de la tienda sin borrarlo")
 
     class Meta:

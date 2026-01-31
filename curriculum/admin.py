@@ -84,4 +84,4 @@ class VentaGarageAdmin(admin.ModelAdmin):
     search_fields = ('nombre_producto', 'item_id', 'descripcion')
     list_editable = ('precio', 'stock', 'activo') # Edita precios y stock sin entrar al producto
     list_per_page = 20
-    readonly_fields = ('fecha_publicacion',)
+    readonly_fields = ()
