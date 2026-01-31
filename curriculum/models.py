@@ -176,7 +176,6 @@ class Reconocimiento(models.Model):
     fecha = models.DateField(default=timezone.now) 
     codigo_registro = models.CharField(max_length=50, blank=True, default="")
     
-    # --- NUEVO CAMPO PARA SUBIR EL PDF ---
     certificado_pdf = models.FileField(
         upload_to='reconocimientos/certificados/', 
         null=True, 
@@ -192,6 +191,22 @@ class Reconocimiento(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    # --- AGREGAR ESTO PARA QUE FUNCIONE LA VISTA PREVIA IGUAL QUE EN CURSOS ---
+    @property
+    def get_preview_url(self):
+        if self.certificado_pdf and hasattr(self.certificado_pdf, 'name'):
+            try:
+                # Generamos una URL limpia solicitando formato JPG a Cloudinary
+                url, options = cloudinary.utils.cloudinary_url(
+                    self.certificado_pdf.name,
+                    resource_type="image", 
+                    format="jpg"           
+                )
+                return url
+            except Exception as e:
+                return self.certificado_pdf.url
+        return None
 
 
 # ==========================================
