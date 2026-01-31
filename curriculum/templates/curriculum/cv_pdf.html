@@ -34,27 +34,10 @@
         .date-badge { font-size: 9pt; color: #666; font-style: italic; text-align: right; }
         .description { font-size: 10pt; text-align: justify; color: #444; margin-top: 5px; }
         
-        /* Estilo especial para la ficha de curso individual */
-        .course-card {
-            border: 2px solid #F0F4F5;
-            background-color: #FAFCFC;
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 100px; /* Para centrarlo un poco en la hoja */
-            text-align: center;
-        }
-        /* cv_pdf.html - Ajuste de Estilos */
-html, body {
-    height: auto; /* Cambiado de 100% para evitar hojas extra */
-    margin: 0;
-    padding: 0;
-}
-table {
-    page-break-inside: auto;
-}
-tr {
-    page-break-inside: avoid;
-}
+        /* Ajuste de Estilos Generales */
+        html, body { height: auto; margin: 0; padding: 0; }
+        table { page-break-inside: auto; }
+        tr { page-break-inside: avoid; }
     </style>
 </head>
 <body>
@@ -125,6 +108,7 @@ tr {
     {% endif %}
 
     {% endif %} 
+
     {% if section_mode == 'courses_list' %}
     <div class="section-header"><div class="section-title">Formación Continua</div></div>
     {% for curso in cursos %}
@@ -141,58 +125,100 @@ tr {
         </tr>
     </table>
     {% endfor %}
-{% endif %}
-
-{% if section_mode == 'bottom' %}
-    {% if ventas %}
-    <div class="section-header"><div class="section-title">Catálogo Venta de Garage</div></div>
-    {% for item in ventas %}
-    <table class="item-row" keep-together="always" style="border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
-        <tr>
-            <td width="70%">
-                <div class="item-title">{{ item.nombre_producto }}</div>
-                <div style="font-size: 8pt; color: #888;">Publicado el: {{ item.fecha_publicacion|date:"d/m/Y" }}</div>
-                <div class="description">{{ item.descripcion|linebreaksbr }}</div>
-            </td>
-            <td width="30%" align="right" valign="top">
-                <div style="font-size: 11pt; font-weight: bold; color: #5A7D84;">${{ item.precio }}</div>
-                <div style="font-size: 8pt;">Stock: {{ item.stock }} | {{ item.estado }}</div>
-            </td>
-        </tr>
-    </table>
-    {% endfor %}
     {% endif %}
-{% endif %}
 
-{% if section_mode == 'certificates_index' %}
-    <div class="section-header"><div class="section-title">Anexo: Documentación de Respaldo</div></div>
+    {% if section_mode == 'bottom' %}
     
-    <table style="margin-left: 15px;">
-        {% for curso in cursos %}
-            {% if curso.certificado_pdf %}
-            <tr>
-                <td width="5%" style="font-weight: bold; color: #5A7D84;">•</td>
-                <td width="95%" style="padding-bottom: 8px;">
-                    <div style="font-size: 11pt; font-weight: bold;">Certificado: {{ curso.nombre_curso }}</div>
-                    <div style="font-size: 9pt; color: #666;">Emitido por: {{ curso.institucion }}</div>
-                </td>
-            </tr>
-            {% endif %}
-        {% endfor %}
-
+        {% if reconocimientos %}
+        <div class="section-header"><div class="section-title">Reconocimientos y Logros</div></div>
         {% for rec in reconocimientos %}
-            {% if rec.certificado_pdf %}
+        <table class="item-row" keep-together="always">
             <tr>
-                <td width="5%" style="font-weight: bold; color: #D4AF37;">★</td>
-                <td width="95%" style="padding-bottom: 8px;">
-                    <div style="font-size: 11pt; font-weight: bold;">Premio/Reconocimiento: {{ rec.nombre }}</div>
-                    <div style="font-size: 9pt; color: #666;">Otorgado por: {{ rec.institucion }}</div>
+                <td width="75%">
+                    <div class="item-title">{{ rec.nombre }}</div>
+                    <div class="item-subtitle">{{ rec.institucion }}</div>
+                </td>
+                <td width="25%" align="right" valign="top">
+                    <div class="date-badge">{{ rec.fecha|date:"Y" }}</div>
                 </td>
             </tr>
+            {% if rec.codigo_registro %}
+            <tr>
+                <td colspan="2"><div class="description" style="font-style: italic; color: #666;">Registro: {{ rec.codigo_registro }}</div></td>
+            </tr>
             {% endif %}
+        </table>
         {% endfor %}
-    </table>
-{% endif %}
+        {% endif %}
+
+        {% if proyectos %}
+        <div class="section-header"><div class="section-title">Portafolio de Proyectos</div></div>
+        {% for pro in proyectos %}
+        <table class="item-row" keep-together="always">
+            <tr>
+                <td width="75%">
+                    <div class="item-title">{{ pro.nombre }}</div>
+                </td>
+                <td width="25%" align="right">
+                    <div class="date-badge">{{ pro.fecha|date:"Y" }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><div class="description">{{ pro.descripcion|linebreaksbr }}</div></td>
+            </tr>
+        </table>
+        {% endfor %}
+        {% endif %}
+
+        {% if ventas %}
+        <div class="section-header"><div class="section-title">Catálogo Venta de Garage</div></div>
+        {% for item in ventas %}
+        <table class="item-row" keep-together="always" style="border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
+            <tr>
+                <td width="70%">
+                    <div class="item-title">{{ item.nombre_producto }}</div>
+                    <div style="font-size: 8pt; color: #888;">Publicado el: {{ item.fecha_publicacion|date:"d/m/Y" }}</div>
+                    <div class="description">{{ item.descripcion|linebreaksbr }}</div>
+                </td>
+                <td width="30%" align="right" valign="top">
+                    <div style="font-size: 11pt; font-weight: bold; color: #5A7D84;">${{ item.precio }}</div>
+                    <div style="font-size: 8pt;">Stock: {{ item.stock }} | {{ item.estado }}</div>
+                </td>
+            </tr>
+        </table>
+        {% endfor %}
+        {% endif %}
+    {% endif %}
+
+    {% if section_mode == 'certificates_index' %}
+        <div class="section-header"><div class="section-title">Anexo: Documentación de Respaldo</div></div>
+        
+        <table style="margin-left: 15px;">
+            {% for curso in cursos %}
+                {% if curso.certificado_pdf %}
+                <tr>
+                    <td width="5%" style="font-weight: bold; color: #5A7D84;">•</td>
+                    <td width="95%" style="padding-bottom: 8px;">
+                        <div style="font-size: 11pt; font-weight: bold;">Certificado: {{ curso.nombre_curso }}</div>
+                        <div style="font-size: 9pt; color: #666;">Emitido por: {{ curso.institucion }}</div>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+
+            {% for rec in reconocimientos %}
+                {% if rec.certificado_pdf %}
+                <tr>
+                    <td width="5%" style="font-weight: bold; color: #D4AF37;">★</td>
+                    <td width="95%" style="padding-bottom: 8px;">
+                        <div style="font-size: 11pt; font-weight: bold;">Premio/Reconocimiento: {{ rec.nombre }}</div>
+                        <div style="font-size: 9pt; color: #666;">Otorgado por: {{ rec.institucion }}</div>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    {% endif %}
 
 </body>
 </html>
