@@ -232,19 +232,21 @@ def generar_cv(request):
 
     # --- PASO 4: ÍNDICE DE CERTIFICADOS (Nuevo requerimiento) ---
     # Crea la lista numerada cronológica de "Certificados" para no dejar la hoja en blanco
-    if cursos_lista:
+    if cursos_lista and any(c.certificado_pdf for c in cursos_lista):
         context_idx = {
             'perfil': perfil,
             'cursos': cursos_lista,
             'section_mode': 'certificates_index',
-            'MEDIA_URL': settings.MEDIA_URL,
         }
         html_idx = template.render(context_idx)
         buffer_idx = BytesIO()
         pisa.CreatePDF(html_idx, dest=buffer_idx, link_callback=link_callback)
         buffer_idx.seek(0)
-        for page in PdfReader(buffer_idx).pages:
-            pdf_writer.add_page(page)
+        reader_idx = PdfReader(buffer_idx)
+        # Solo añadimos si el PDF generado tiene contenido real
+        if len(reader_idx.pages) > 0:
+            for page in reader_idx.pages:
+                pdf_writer.add_page(page)
 
     # --- PASO 5: ADJUNTAR LOS PDFs ORIGINALES DESDE CLOUDINARY ---
     for curso in cursos_lista:
