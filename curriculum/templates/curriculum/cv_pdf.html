@@ -43,6 +43,19 @@
             margin-top: 100px; /* Para centrarlo un poco en la hoja */
             text-align: center;
         }
+        html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    /* Evita que las tablas se corten mal y generen hojas extra */
+    table {
+        page-break-inside: auto;
+    }
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
     </style>
 </head>
 <body>
@@ -158,23 +171,23 @@
 {% endif %}
 
 {% if section_mode == 'certificates_index' %}
-    <div style="page-break-before: always;"></div>
     <div class="section-header"><div class="section-title">Anexo: Certificados</div></div>
     <p style="font-size: 10pt; color: #666; margin-bottom: 20px;">Listado de acreditaciones originales adjuntas:</p>
+    
     <table style="margin-left: 20px;">
         {% for curso in cursos %}
-        {% if curso.certificado_pdf %}
-        <tr>
-            <td width="5%" valign="top" style="padding-bottom: 10px;">{{ forloop.counter }}.</td>
-            <td width="95%" style="padding-bottom: 10px;">
-                <div style="font-size: 11pt; font-weight: bold;">Certificado "{{ curso.nombre_curso }}"</div>
-                <div style="font-size: 9pt; color: #5A7D84;">{{ curso.institucion }}</div>
-            </td>
-        </tr>
-        {% endif %}
+            {% if curso.certificado_pdf %}
+            <tr>
+                <td width="5%" valign="top" style="padding-bottom: 10px; font-weight: bold;">{{ forloop.counter }}.</td>
+                <td width="95%" style="padding-bottom: 10px;">
+                    <div style="font-size: 11pt; font-weight: bold;">Certificado "{{ curso.nombre_curso }}"</div>
+                    <div style="font-size: 9pt; color: #5A7D84;">{{ curso.institucion }}</div>
+                </td>
+            </tr>
+            {% endif %}
         {% endfor %}
     </table>
-{% endif %}
+    {% endif %}
 
 
 
