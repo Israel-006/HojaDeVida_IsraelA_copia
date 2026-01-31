@@ -221,8 +221,8 @@ class ProductoLaboral(models.Model):
 class VentaGarage(models.Model):
     ESTADO_CHOICES = [
         ('Nuevo', 'Nuevo'), 
-        ('Como Nuevo', 'Como Nuevo'), 
-        ('Usado', 'Usado')
+        ('Bueno', 'Bueno'), 
+        ('Regular', 'Regular')
     ]
     
     nombre_producto = models.CharField(max_length=200)
@@ -232,7 +232,7 @@ class VentaGarage(models.Model):
     item_id = models.CharField(max_length=50, unique=True) # Agregado unique para evitar duplicados
     imagen = models.ImageField(upload_to='venta/', null=True, blank=True)
     stock = models.PositiveIntegerField(default=1, help_text="Cantidad disponible")
-    
+    fecha_publicacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Publicación")
     activo = models.BooleanField(default=True, help_text="Desactívalo para ocultarlo de la tienda sin borrarlo")
 
     class Meta:

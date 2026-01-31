@@ -235,48 +235,21 @@ def generar_cv(request):
         pdf_writer.add_page(page)
 
     # --- PASO 2: INSERTAR CURSOS Y ADJUNTAR CERTIFICADOS ---
+    # --- PASO 2: SOLO TEXTO DE CURSOS ---
     if cursos_lista:
-        for curso in cursos_lista:
-            # A. Generar la página con la info del curso (Título, horas, institución)
-            context_curso = {
-                'perfil': perfil,
-                'cursos': [curso],
-                'section_mode': 'course_single',
-                'MEDIA_URL': settings.MEDIA_URL,
-            }
-            html_curso = template.render(context_curso)
-            buffer_curso = BytesIO()
-            pisa.CreatePDF(html_curso, dest=buffer_curso, link_callback=link_callback)
-            buffer_curso.seek(0)
-            
-            reader_curso = PdfReader(buffer_curso)
-            for page in reader_curso.pages:
-                pdf_writer.add_page(page)
-
-            # B. Adjuntar el PDF del certificado (DESDE LA NUBE - CLOUDINARY)
-            if curso.certificado_pdf:
-                try:
-                    pdf_url = curso.certificado_pdf.url
-                    # Agregamos timeout para que no se quede pensando eternamente
-                    response = requests.get(pdf_url, timeout=10)
-                    
-                    if response.status_code == 200:
-                        try:
-                            cert_buffer = BytesIO(response.content)
-                            reader_cert = PdfReader(cert_buffer)
-                            
-                            # Validar que sea un PDF real antes de intentar leer páginas
-                            if len(reader_cert.pages) > 0:
-                                for page in reader_cert.pages:
-                                    pdf_writer.add_page(page)
-                        except Exception as e_pdf:
-                            print(f"El archivo descargado no es un PDF válido: {e_pdf}")
-                            # No hacemos 'raise', solo continuamos sin este certificado
-                    else:
-                        print(f"Cloudinary denegó el acceso (Posible 401/404): {pdf_url}")
-
-                except Exception as e:
-                    print(f"Error general adjuntando certificado {curso.nombre_curso}: {e}")
+        context_cursos_texto = {
+            'perfil': perfil,
+            'cursos': cursos_lista,
+            'section_mode': 'course_single', # O un modo que solo liste nombres
+            'MEDIA_URL': settings.MEDIA_URL,
+        }
+        html_cursos = template.render(context_cursos_texto)
+        buffer_cursos = BytesIO()
+        pisa.CreatePDF(html_cursos, dest=buffer_cursos, link_callback=link_callback)
+        buffer_cursos.seek(0)
+        reader_cursos = PdfReader(buffer_cursos)
+        for page in reader_cursos.pages:
+            pdf_writer.add_page(page)
 
     # --- PASO 3: PARTE INFERIOR (RECONOCIMIENTOS, PROYECTOS, ETC) ---
     if reconocimientos or proyectos or ventas:
@@ -300,18 +273,34 @@ def generar_cv(request):
         for page in reader_3.pages:
             pdf_writer.add_page(page)
 
-    # --- FINALIZAR Y ENVIAR ---
+    # --- PASO 4: ADJUNTAR CERTIFICADOS AL FINAL ---
+    # Recorremos los cursos para anexar sus PDFs originales al final de todo
+    if cursos_lista:
+        for curso in cursos_lista:
+            if curso.certificado_pdf:
+                try:
+                    pdf_url = curso.certificado_pdf.url
+                    response_pdf = requests.get(pdf_url, timeout=10)
+                    if response_pdf.status_code == 200:
+                        cert_buffer = BytesIO(response_pdf.content)
+                        reader_cert = PdfReader(cert_buffer)
+                        for page in reader_cert.pages:
+                            pdf_writer.add_page(page)
+                except Exception as e:
+                    print(f"Error adjuntando certificado de {curso.nombre_curso}: {e}")
+
+    # --- PASO 5: FINALIZAR, NUMERAR Y ENVIAR ---
     try:
+        # Esto ahora contará todas las páginas, incluidos los certificados anexados
         pdf_writer_numerado = numerar_paginas(pdf_writer)
     except Exception as e:
         print(f"Error numerando páginas: {e}")
-        pdf_writer_numerado = pdf_writer # Si falla, entregamos sin números (fallback)
+        pdf_writer_numerado = pdf_writer 
 
     final_buffer = BytesIO()
     pdf_writer_numerado.write(final_buffer)
     
     response = HttpResponse(final_buffer.getvalue(), content_type='application/pdf')
-    # Limpiamos el nombre del archivo
     safe_name = "".join([c for c in perfil.nombres if c.isalnum() or c in (' ', '_')]).strip()
     filename = f"CV_Personalizado_{safe_name}.pdf"
     response['Content-Disposition'] = f'inline; filename="{filename}"'

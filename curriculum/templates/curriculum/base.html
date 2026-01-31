@@ -14,147 +14,143 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
     
     <style>
+        /* Variables */
+        :root {
+            --primary-color: #5A7D84;    
+            --secondary-color: #BBD2D6;  
+            --bg-color: rgb(236, 250, 252);
+            --icon-color: #5A7D84;
+            --gradient-start: #5A7D84;
+            --gradient-end: #1a1a1a;
+        }
+
         body { 
             font-family: 'Outfit', sans-serif; 
-            background-color: rgb(236, 250, 252); 
+            background-color: var(--bg-color); 
             color: #1a1a1a; 
             margin: 0; 
             font-size: 115%; 
+            transition: background-color 0.5s ease; 
         }
         
         .fade-in { animation: fadeIn 0.8s ease-out forwards; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-        }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
 
-        /* MENU DE VIDRIO ORIGINAL */
         .glass-nav {
             background: rgba(187, 210, 214, 0.98); 
             backdrop-filter: blur(25px);
             border-right: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        .nav-active {
-            background-color: #1a1a1a !important;
-            color: white !important;
-            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.2);
+        /* Overrides */
+        .text-\[\#5A7D84\] { color: var(--primary-color) !important; }
+        .bg-\[\#5A7D84\] { background-color: var(--primary-color) !important; }
+        .hover\:bg-\[\#5A7D84\]:hover { background-color: var(--primary-color) !important; }
+        .hover\:text-\[\#5A7D84\]:hover { color: var(--primary-color) !important; }
+        .border-\[\#5A7D84\] { border-color: var(--primary-color) !important; }
+        .hover\:border-\[\#5A7D84\]:hover { border-color: var(--primary-color) !important; }
+        .bg-\[\#BBD2D6\] { background-color: var(--secondary-color) !important; }
+        .bg-gradient-to-r { background-image: linear-gradient(to right, var(--gradient-start), var(--gradient-end)) !important; }
+
+        /* Iconos */
+        body:not(.rgb-icons) svg.lucide { stroke: var(--icon-color) !important; transition: all 0.3s ease; }
+        body:not(.rgb-icons) button:hover svg.lucide,
+        body:not(.rgb-icons) a:hover svg.lucide,
+        body:not(.rgb-icons) .group:hover svg.lucide,
+        body:not(.rgb-icons) .text-white svg.lucide { stroke: currentColor !important; }
+
+        @keyframes rainbow-stroke { 0% { stroke: #ff0000; } 20% { stroke: #ffff00; } 40% { stroke: #00ff00; } 60% { stroke: #00ffff; } 80% { stroke: #0000ff; } 100% { stroke: #ff00ff; } }
+        body.rgb-icons svg.lucide { animation: rainbow-stroke 2s linear infinite !important; stroke: #ff0000; }
+
+        /* Títulos RGB y Admin */
+        @keyframes rainbow-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        body.rgb-titles h1, body.rgb-titles h2, body.rgb-titles .text-transparent, .rainbow-text {
+            background-image: linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) !important;
+            background-size: 300% !important;
+            animation: rainbow-flow 3s linear infinite !important;
+            -webkit-text-fill-color: transparent !important;
+            -webkit-background-clip: text !important;
+            color: transparent !important;
         }
 
-        .hamburger-btn {
-            background: rgba(187, 210, 214, 0.8);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.5);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Bordes Neón */
+        @keyframes neon-border {
+            0% { border-color: #ff0000; box-shadow: 0 0 5px #ff0000; } 50% { border-color: #00ffff; box-shadow: 0 0 5px #00ffff; } 100% { border-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
         }
-        .hamburger-btn:hover {
-            transform: scale(1.1);
-            background: rgba(187, 210, 214, 1);
+        body.rgb-borders article, body.rgb-borders .bg-white.rounded-\[3\.5rem\], body.rgb-borders .bg-white.rounded-\[2\.5rem\] {
+            border: 2px solid transparent !important; animation: neon-border 3s linear infinite;
         }
 
+        /* =========================================
+           20 ESTILOS DE MARCO (CSS PURO)
+           ========================================= */
+        
+        @keyframes spin-cw { to { transform: rotate(360deg); } }
+        @keyframes spin-ccw { to { transform: rotate(-360deg); } }
+        @keyframes pulse-gen { 50% { transform: scale(1.05); filter: brightness(1.2); } }
+        @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes glitch-skew { 0% { transform: skewX(0deg); } 20% { transform: skewX(-5deg); } 40% { transform: skewX(5deg); } 60% { transform: skewX(-2deg); } 80% { transform: skewX(2deg); } 100% { transform: skewX(0deg); } }
+
+        /* Clase Base del Marco */
+        @keyframes rgb-cycle {
+            0% { filter: hue-rotate(0deg) contrast(1.2) brightness(1.2); }
+            100% { filter: hue-rotate(360deg) contrast(1.2) brightness(1.2); }
+        }
+
+        /* Clase Base del Marco */
+        .frame-layer {
+            position: absolute; inset: 0; z-index: 0;
+            border-radius: 50% !important;
+            background: var(--secondary-color);
+            transition: all 0.5s ease;
+        }
+        
+        /* Aplica esto si la clase se pone en el contenedor padre */
+        .photo-rgb-active #active-frame {
+            animation: rgb-cycle 2s linear infinite, spin-cw 3s linear infinite !important; 
+            /* Combinamos rgb-cycle con rotación para un efecto máximo */
+            filter: hue-rotate(0deg); /* Reset para que la animación tome control */
+        }
+
+        /* --- ESTILOS 1-10 (Clásicos) --- */
+        .frame-style-1 { background: conic-gradient(var(--primary-color), transparent, var(--primary-color)); animation: spin-cw 3s linear infinite; }
+        .frame-style-2 { border: 4px dashed var(--primary-color); background: transparent; animation: spin-cw 10s linear infinite; }
+        .frame-style-3 { background: linear-gradient(45deg, red, blue); animation: spin-cw 2s linear infinite; filter: blur(4px); }
+        .frame-style-4 { background: radial-gradient(circle, transparent 60%, var(--primary-color) 60%); animation: pulse-gen 2s infinite; }
+        .frame-style-5 { border: 3px dotted var(--icon-color); background: transparent; animation: spin-ccw 5s linear infinite; }
+        .frame-style-6 { background: conic-gradient(from 0deg, red, orange, yellow, green, blue, purple, red); animation: spin-cw 2s linear infinite; }
+        .frame-style-7 { border: 2px solid white; box-shadow: 0 0 10px white; background: transparent; animation: flicker 1s infinite; }
+        .frame-style-8 { background: conic-gradient(black, white, black); animation: spin-cw 1s linear infinite; opacity: 0.5; }
+        .frame-style-9 { border: 5px double var(--primary-color); background: transparent; animation: spin-cw 5s linear infinite reverse; }
+        .frame-style-10 { background: repeating-conic-gradient(var(--primary-color) 0% 5%, transparent 5% 10%); animation: spin-cw 8s linear infinite; }
+
+        /* --- ESTILOS 11-20 (Inspirados en GIFs) --- */
+        .frame-style-11 { /* Pyre */ background: conic-gradient(from 180deg, #550000, #ff0000, #ffcc00, #ff0000, #550000); filter: blur(3px) contrast(1.5); animation: spin-cw 2s linear infinite, flicker 0.1s infinite alternate; box-shadow: 0 0 15px #ff0000; }
+        .frame-style-12 { /* Neon Cyberpunk */ background: transparent; box-shadow: 0 0 5px #00f3ff, inset 0 0 5px #ff00ff; border: 2px solid rgba(255,255,255,0.5); animation: spin-cw 4s linear infinite, pulse-gen 2s infinite alternate; }
+        .frame-style-13 { /* Arcane */ background: transparent; border: 4px dashed #8a2be2; box-shadow: 0 0 10px #8a2be2; animation: spin-ccw 6s linear infinite; }
+        .frame-style-14 { /* Energy */ background: radial-gradient(transparent 65%, #00ff88 70%, transparent 75%); animation: spin-cw 1s linear infinite; filter: brightness(1.5); }
+        .frame-style-15 { /* Glitch RGB */ background: transparent; border: 3px solid white; box-shadow: -3px 0 red, 3px 0 blue; animation: glitch-skew 0.5s steps(3) infinite; }
+        .frame-style-16 { /* Gold */ background: conic-gradient(from 45deg, #ffd700, #daa520, #ffd700, transparent, #ffd700); filter: contrast(1.2); animation: spin-cw 10s linear infinite; }
+        .frame-style-17 { /* Void */ background: conic-gradient(black, #330066, black, #4b0082, black); box-shadow: 0 0 20px #330066; animation: spin-cw 3s linear infinite reverse; }
+        .frame-style-18 { /* Lightning */ background: transparent; border: 2px solid #ffffff; box-shadow: 0 0 10px #00aaff, inset 0 0 10px #00aaff; animation: flicker 0.05s infinite alternate; }
+        .frame-style-19 { /* Toxic */ background: conic-gradient(transparent, #00ff00, #adff2f, #00ff00, transparent); filter: blur(2px); animation: spin-cw 4s linear infinite; }
+        .frame-style-20 { /* Nebula */ background: conic-gradient(from 90deg, #ff00ff, #00ffff, #0000ff, #ff00ff); filter: blur(4px); animation: spin-ccw 5s linear infinite; }
+
+        .hamburger-btn { transition: all 0.3s; }
         .sidebar-closed { transform: translateX(-100%); }
-        .sidebar-open { transform: translateX(0); }
-
-        /* ================================================= */
-        /* ZONA DE EFECTOS ESPECIALES (MODO CIBERNÉTICO)     */
-        /* ================================================= */
-
-        /* 1. TEXTO ADMIN ARCOÍRIS (Velocidad Media) */
-        @keyframes rainbow-flow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .rainbow-text {
-            background: linear-gradient(
-                90deg, 
-                #00f3ff, #0066ff, #ff00ff, #00f3ff /* Paleta Tech */
-            );
-            background-size: 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: rainbow-flow 3s linear infinite;
-            font-weight: 900 !important;
-            filter: drop-shadow(0 0 5px rgba(0, 243, 255, 0.6));
-            transform: scale(1.15);
-            display: inline-block;
-        }
-
-        /* 2. REACTOR DE ENERGÍA (ESTILO ELECTRÓNICO) */
-        
-        /* Rotación rápida y constante */
-        @keyframes cyber-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Pulso eléctrico (Strobe effect) */
-        @keyframes tech-pulse {
-            0%, 100% { opacity: 1; filter: blur(10px); }
-            50% { opacity: 0.7; filter: blur(15px); }
-        }
-
-        .photo-rgb-frame {
-            position: relative;
-            background: #000 !important;
-            border: none !important;
-            box-shadow: 0 0 0 rgba(0,0,0,0) !important;
-            z-index: 10;
-        }
-
-        /* CAPA 1: Turbina de Alta Velocidad (Definida) */
-        .photo-rgb-frame::before {
-            content: '';
-            position: absolute;
-            top: -4px; left: -4px; right: -4px; bottom: -4px;
-            /* Gradiente "Tech": Transparente -> Cyan -> Magenta -> Transparente */
-            background: conic-gradient(
-                transparent 0deg, 
-                #00f3ff 90deg, 
-                #ff00ff 180deg, 
-                #00f3ff 270deg, 
-                transparent 360deg
-            );
-            border-radius: 50%;
-            z-index: -1;
-            /* Velocidad aumentada: 1.5s (Antes era 6s) */
-            animation: cyber-spin 1.5s linear infinite;
-        }
-
-        /* CAPA 2: Resplandor de Plasma (Glow pulsante) */
-        .photo-rgb-frame::after {
-            content: '';
-            position: absolute;
-            top: -8px; left: -8px; right: -8px; bottom: -8px;
-            background: conic-gradient(
-                transparent 0deg, 
-                #00f3ff 90deg, 
-                #ff00ff 180deg, 
-                #00f3ff 270deg, 
-                transparent 360deg
-            );
-            border-radius: 50%;
-            z-index: -2;
-            animation: cyber-spin 1.5s linear infinite, tech-pulse 0.5s ease-in-out infinite;
-        }
-        
+        .sidebar-open { transform: translateX(0%); }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden relative">
 
     <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
 
-    <button id="hamburger-btn" onclick="toggleSidebar()" class="hamburger-btn fixed top-6 left-6 z-[120] p-4 rounded-2xl text-gray-700 focus:outline-none group">
-        <i data-lucide="menu" size="28" class="group-hover:text-pink-600 transition-colors"></i>
+    <button id="hamburger-btn" onclick="toggleSidebar()" class="hamburger-btn fixed top-6 left-6 z-[120] p-4 rounded-2xl text-gray-700 focus:outline-none group bg-white/50 backdrop-blur-md shadow-lg border border-white/40">
+        <i data-lucide="menu" size="28" class="group-hover:text-[#5A7D84] transition-colors"></i>
     </button>
 
     <div id="menu-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity duration-500"></div>
@@ -162,52 +158,49 @@
     <aside id="main-sidebar" class="fixed left-0 top-0 bottom-0 w-80 glass-nav flex flex-col items-center py-8 z-[100] transition-transform duration-500 shadow-2xl sidebar-closed">
         
         <div class="h-16 w-full mb-4 flex items-center justify-between px-6">
-            
-            <div class="flex items-center gap-2 group/rgb" title="Activar Modo Fiesta">
-                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover/rgb:text-pink-600 transition-colors">RGB</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="rgbSwitch" class="sr-only peer">
-                    <div class="w-8 h-4 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-pink-500 peer-checked:via-purple-500 peer-checked:to-indigo-500 shadow-inner"></div>
-                </label>
-            </div>
-
-            <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest cursor-pointer hover:text-pink-600 transition-colors p-2" onclick="toggleSidebar()">
-                <span class="border-b border-gray-400 pb-0.5">Cerrar Menú</span>
+            <div></div>
+            <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest cursor-pointer hover:text-[#5A7D84] transition-colors p-2" onclick="toggleSidebar()">
+                <span class="border-b border-gray-400 pb-0.5">Cerrar</span>
             </span>
         </div>
 
         <div class="mb-10 flex flex-col items-center w-full shrink-0 animate-in fade-in slide-in-from-top-4 duration-700">
             <div class="mb-6 relative group cursor-pointer z-50">
-                <div id="photo-container" class="w-32 h-32 rounded-full p-1.5 border border-white/60 shadow-xl mx-auto bg-white/20 backdrop-blur-sm transition-all duration-300">
-                    {% if perfil and perfil.foto %}
-                        <img src="{{ perfil.foto.url }}" alt="Foto" class="w-full h-full object-cover rounded-full z-20 relative bg-white">
-                    {% else %}
-                        <div class="w-full h-full bg-[#1a1a1a] rounded-full flex items-center justify-center text-white font-black text-4xl shadow-inner z-20 relative">
-                            {% if perfil %}{{ perfil.nombres|first }}{% else %}V{% endif %}
-                        </div>
-                    {% endif %}
+                
+                <div id="photo-container" class="w-36 h-36 flex items-center justify-center relative">
+                    
+                    <div id="active-frame" class="frame-layer"></div>
+                    
+                    <div class="relative z-10 w-28 h-28 rounded-full overflow-hidden border-[6px] border-[#ecfafc] shadow-lg bg-white">
+                        {% if perfil.foto %}
+                            <img src="{{ perfil.foto.url }}" alt="Foto" class="w-full h-full object-cover rounded-full">
+                        {% else %}
+                            <div class="w-full h-full bg-[#1a1a1a] flex items-center justify-center text-white font-black text-4xl rounded-full">
+                                {{ perfil.nombres|first|default:"U" }}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
+
             </div>
 
             <div class="text-center px-6">
                 <p class="font-black text-xl sm:text-2xl md:text-3xl tracking-tighter text-gray-800 uppercase leading-none transition-all duration-300">
-                    {% if perfil %}{{ perfil.nombres }}<br>{{ perfil.apellidos }}{% else %}Valeria<br>Meza{% endif %}
+                    {% if perfil %}{{ perfil.nombres }}<br>{{ perfil.apellidos }}{% else %}Usuario<br>Demo{% endif %}
                 </p>
                 <div class="h-1 w-12 bg-gray-800 mx-auto mt-4 rounded-full"></div>
             </div>
         </div>
 
-        <ul id="nav-list" class="w-full space-y-4 flex-grow overflow-y-auto custom-scrollbar px-8 scroll-smooth flex flex-col overscroll-contain py-4">
+        <ul id="nav-list" class="w-full space-y-4 flex-grow overflow-y-auto custom-scrollbar px-8 scroll-smooth flex flex-col py-4">
             {% with request.resolver_match.url_name as url_name %}
-            
-            <li><a href="{% url 'inicio' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'inicio' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Inicio</span></a></li>
-            <li><a href="{% url 'experiencia' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'experiencia' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Experiencia</span></a></li>
-            <li><a href="{% url 'educacion' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'educacion' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Educación</span></a></li>
-            <li><a href="{% url 'cursos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'cursos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Cursos</span></a></li>
-            <li><a href="{% url 'reconocimientos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'reconocimientos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Logros</span></a></li>
-            <li><a href="{% url 'trabajos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'trabajos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Trabajos</span></a></li>
-            <li><a href="{% url 'venta' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'venta' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-pink-600 hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Venta</span></a></li>
-
+            <li><a href="{% url 'inicio' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'inicio' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Inicio</span></a></li>
+            <li><a href="{% url 'experiencia' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'experiencia' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Experiencia</span></a></li>
+            <li><a href="{% url 'educacion' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'educacion' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Educación</span></a></li>
+            <li><a href="{% url 'cursos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'cursos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Cursos</span></a></li>
+            <li><a href="{% url 'reconocimientos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'reconocimientos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Logros</span></a></li>
+            <li><a href="{% url 'trabajos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'trabajos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Trabajos</span></a></li>
+            <li><a href="{% url 'venta' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'venta' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Venta</span></a></li>
             {% endwith %}
         </ul>
         
@@ -221,11 +214,11 @@
         {% block content %}{% endblock %}
     </main>
 
+    {% include 'curriculum/settings.html' %}
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         });
 
         function toggleSidebar() {
@@ -242,116 +235,176 @@
                 overlay.classList.add('opacity-0'); setTimeout(() => overlay.classList.add('hidden'), 500);
                 hamBtn.classList.remove('opacity-0', 'scale-0', 'pointer-events-none');
             }
-            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const canvas = document.getElementById('particle-canvas');
-            const ctx = canvas.getContext('2d');
-            const rgbSwitch = document.getElementById('rgbSwitch');
-            
-            // Referencias
-            const adminLink = document.getElementById('admin-link');
-            const photoContainer = document.getElementById('photo-container');
-            
-            let particlesArray;
-            
-            // 1. RECUPERAR ESTADO
-            let isRGB = localStorage.getItem('rgbMode') === 'true';
+    // --- SCRIPT DE PARTÍCULAS INTERACTIVO ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let particlesArray = [];
+        let particleShape = 'circle'; 
+        let particleRGB = false;
+        let speedMult = 1;
+        let sizeMult = 1;
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+        resizeCanvas();
 
-            // 2. APLICAR ESTADO AL CARGAR
-            if(rgbSwitch) rgbSwitch.checked = isRGB;
-            
-            function toggleEffects(enable) {
-                if(enable) {
-                    if(photoContainer) photoContainer.classList.add('photo-rgb-frame');
-                    if(adminLink) adminLink.classList.add('rainbow-text');
+        // --- FUNCIONES GLOBALES CONECTADAS A SETTINGS ---
+        window.setParticleShape = (shape) => { particleShape = shape; initParticles(); };
+        
+        // NUEVO: Función explícita para forzar el estado RGB desde settings
+        window.setParticleRGB = (isRGB) => { particleRGB = isRGB; }; 
+        
+        window.toggleParticleRGB = () => { particleRGB = !particleRGB; };
+        
+        window.updateParticleSettings = () => {
+            const speedInput = document.getElementById('particleSpeed');
+            const sizeInput = document.getElementById('particleSize');
+            if(speedInput) speedMult = parseFloat(speedInput.value);
+            if(sizeInput) sizeMult = parseFloat(sizeInput.value);
+        };
+        
+        window.initParticles = () => {
+            const countInput = document.getElementById('particleCount');
+            // Si el input no existe aún, usa un default seguro
+            const count = countInput ? parseInt(countInput.value) : 50;
+            particlesArray = [];
+            for (let i = 0; i < count; i++) {
+                particlesArray.push(new Particle());
+            }
+        };
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 4 + 1;
+                this.speedX = (Math.random() * 0.4 - 0.2);
+                this.speedY = (Math.random() * 0.4 - 0.2);
+                this.hue = Math.random() * 360; 
+                this.char = Math.random() > 0.5 ? '1' : '0'; 
+            }
+            update() {
+                this.x += this.speedX * speedMult;
+                this.y += this.speedY * speedMult;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if(particleRGB) this.hue += 2;
+            }
+            draw() {
+                if (particleRGB) {
+                    ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
                 } else {
-                    if(photoContainer) photoContainer.classList.remove('photo-rgb-frame');
-                    if(adminLink) adminLink.classList.remove('rainbow-text');
+                    // Obtener color actual dinámicamente por si cambió el tema
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+                }
+
+                ctx.beginPath();
+                let s = this.size * sizeMult; 
+
+                switch(particleShape) {
+                    case 'circle': ctx.arc(this.x, this.y, s, 0, Math.PI * 2); ctx.fill(); break;
+                    case 'square': ctx.fillRect(this.x, this.y, s * 2, s * 2); break;
+                    case 'triangle': ctx.moveTo(this.x, this.y); ctx.lineTo(this.x + s, this.y + s * 2); ctx.lineTo(this.x - s, this.y + s * 2); ctx.fill(); break;
+                    case 'diamond': ctx.moveTo(this.x, this.y - s); ctx.lineTo(this.x + s, this.y); ctx.lineTo(this.x, this.y + s); ctx.lineTo(this.x - s, this.y); ctx.fill(); break;
+                    case 'cross': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('✚', this.x, this.y); break;
+                    case 'pentagon': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('⬟', this.x, this.y); break;
+                    case 'hexagon': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('⬢', this.x, this.y); break;
+                    case 'star': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('★', this.x, this.y); break;
+                    case 'ring': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('◎', this.x, this.y); break;
+                    case 'infinity': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('∞', this.x, this.y); break;
+                    case 'heart': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('❤', this.x, this.y); break;
+                    case 'leaf': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('🍃', this.x, this.y); break;
+                    case 'fire': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('🔥', this.x, this.y); break;
+                    case 'snow': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('❄', this.x, this.y); break;
+                    case 'bolt': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('⚡', this.x, this.y); break;
+                    case 'code': ctx.font = `${s * 3}px monospace`; ctx.fillText(this.char, this.x, this.y); break;
+                    case 'brackets': ctx.font = `${s * 3}px monospace`; ctx.fillText('{ }', this.x, this.y); break;
+                    case 'pacman': ctx.beginPath(); ctx.arc(this.x, this.y, s, 0.2 * Math.PI, 1.8 * Math.PI); ctx.lineTo(this.x, this.y); ctx.fill(); break;
+                    case 'ghost': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('👻', this.x, this.y); break;
+                    case 'music': ctx.font = `${s * 3}px sans-serif`; ctx.fillText('♫', this.x, this.y); break;
+                    default: ctx.arc(this.x, this.y, s, 0, Math.PI * 2); ctx.fill();
                 }
             }
+        }
 
-            toggleEffects(isRGB);
-
-            /* --- PARTÍCULAS --- */
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
             }
-            resizeCanvas();
-            window.addEventListener('resize', () => {
-                resizeCanvas();
-                initParticles();
-            });
+            requestAnimationFrame(animate);
+        }
 
-            const normalColors = ['#BBD2D6', '#A0B4B8', '#D1E0E3'];
+        initParticles();
+        animate();
+    });
+    
+    // --- GESTIÓN DE MARCOS Y ANIMACIONES ---
+    window.updateFrameState = function() {
+        const switchEl = document.getElementById('frameRgbSwitch');
+        // Si el switch no existe (aún no cargó settings), asumimos false
+        const isRgbActive = switchEl ? switchEl.checked : false;
+        
+        const frame = document.getElementById('active-frame');
+        const adminLink = document.getElementById('admin-link');
+        
+        if(!frame) return; 
 
-            function getColor() {
-                if (isRGB) {
-                    return `hsl(${Math.random() * 360}, 100%, 50%)`;
-                } else {
-                    return normalColors[Math.floor(Math.random() * normalColors.length)];
-                }
-            }
+        // 1. Limpiar clases previas
+        for(let i=1; i<=20; i++) {
+            frame.classList.remove('frame-style-' + i);
+        }
+        
+        // 2. Aplicar estilo seleccionado
+        if (typeof currentFrameStyle !== 'undefined' && currentFrameStyle > 0) {
+            frame.classList.add('frame-style-' + currentFrameStyle);
+        } else {
+            frame.classList.add('frame-style-1'); 
+        }
+        
+        // 3. APLICAR MODO RGB
+        // Quitamos la clase primero para asegurar que se reinicie si es necesario
+        frame.classList.remove('photo-rgb-active'); 
+        
+        if(isRgbActive) {
+            // Agregamos la clase al contenedor padre del frame (.frame-layer está dentro o es el div)
+            // NOTA: En tu HTML el id="active-frame" TIENE la clase .frame-layer.
+            // Por tanto, aplicamos una clase padre o modificamos el selector CSS.
+            // Para que funcione con el CSS de arriba (.photo-rgb-active .frame-layer),
+            // necesitamos poner la clase .photo-rgb-active en el PADRE del frame layer
+            // O modificar el CSS para que sea .frame-layer.photo-rgb-active.
+            
+            // MÉTODO MÁS SEGURO SEGÚN TU HTML:
+            document.getElementById('photo-container').classList.add('photo-rgb-active');
+            
+            if(adminLink) adminLink.classList.add('rainbow-text');
+        } else {
+            document.getElementById('photo-container').classList.remove('photo-rgb-active');
+            if(adminLink) adminLink.classList.remove('rainbow-text');
+        }
+    };
 
-            class Particle {
-                constructor() {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                    this.size = Math.random() * 3 + 1;
-                    this.speedX = (Math.random() * 0.4) - 0.2;
-                    this.speedY = (Math.random() * 0.4) - 0.2;
-                    this.color = getColor();
-                }
-                update() {
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-                    if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
-                    if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
-                }
-                draw() {
-                    ctx.fillStyle = this.color;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                changeColorMode() {
-                    this.color = getColor();
-                }
-            }
+    window.updateFrameDesign = function(id) {
+        currentFrameStyle = id;
+        window.updateFrameState();
+    };
 
-            function initParticles() {
-                particlesArray = [];
-                const numberOfParticles = (canvas.width * canvas.height) / 18000;
-                for (let i = 0; i < numberOfParticles; i++) {
-                    particlesArray.push(new Particle());
-                }
-            }
-
-            function animateParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let i = 0; i < particlesArray.length; i++) {
-                    particlesArray[i].update();
-                    particlesArray[i].draw();
-                }
-                requestAnimationFrame(animateParticles);
-            }
-
-            if(rgbSwitch){
-                rgbSwitch.addEventListener('change', function() {
-                    isRGB = this.checked;
-                    localStorage.setItem('rgbMode', isRGB);
-                    particlesArray.forEach(p => p.changeColorMode());
-                    toggleEffects(isRGB);
-                });
-            }
-
-            initParticles();
-            animateParticles();
-        });
-    </script>
+    // ESTA FUNCIÓN ES LA QUE CONECTA EL CLICK DEL SWITCH
+    window.toggleFrameRGB = function() {
+        window.updateFrameState();
+    };
+</script>
 </body>
 </html>

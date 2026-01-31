@@ -1,0 +1,504 @@
+{% load static %}
+<button onclick="toggleSettings()" class="fixed bottom-6 right-6 z-[100] w-14 h-14 bg-[#1a1a1a] text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 hover:rotate-90 transition-all duration-500 group border border-gray-700">
+    <i data-lucide="settings" class="w-6 h-6 group-hover:text-[#00f3ff] transition-colors"></i>
+</button>
+
+<div id="settingsPanel" class="fixed top-0 right-0 h-full w-80 bg-[#0f172a]/95 backdrop-blur-xl border-l border-white/10 shadow-2xl z-[110] transform translate-x-full transition-transform duration-500 overflow-y-auto custom-scrollbar overscroll-contain">
+    
+    <div class="p-6 border-b border-white/10 flex justify-between items-center sticky top-0 bg-[#0f172a]/95 z-20 backdrop-blur-xl">
+        <h3 class="text-white font-black uppercase tracking-widest text-sm flex items-center gap-2">
+            <i data-lucide="sliders" class="w-4 h-4 text-[#00f3ff]"></i> Centro de Mando
+        </h3>
+        <button onclick="toggleSettings()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+
+    <div class="px-6 py-2">
+
+        <div class="border-b border-white/5">
+            <button onclick="toggleSection('secParticles')" class="w-full flex justify-between items-center py-5 text-left group focus:outline-none">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] group-hover:text-white transition-colors">1. Partículas</span>
+                <span class="text-gray-400 group-hover:text-[#00f3ff] transition-colors">
+                    <i id="icon-secParticles" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 transform"></i>
+                </span>
+            </button>
+            
+            <div id="secParticles" class="accordion-content max-h-[1000px] overflow-hidden transition-all duration-500 ease-in-out">
+                <div class="pb-6 space-y-4 pl-1">
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="selectShape('circle')" id="btn-shape-circle" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Círculo">●</button>
+                        <button onclick="selectShape('square')" id="btn-shape-square" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Cuadrado">■</button>
+                        <button onclick="selectShape('triangle')" id="btn-shape-triangle" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Triángulo">▲</button>
+                        <button onclick="selectShape('diamond')" id="btn-shape-diamond" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Diamante">◆</button>
+                        <button onclick="selectShape('cross')" id="btn-shape-cross" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Cruz">✚</button>
+                        <button onclick="selectShape('pentagon')" id="btn-shape-pentagon" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Pentágono">⬟</button>
+                        <button onclick="selectShape('hexagon')" id="btn-shape-hexagon" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Hexágono">⬢</button>
+                        <button onclick="selectShape('star')" id="btn-shape-star" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Estrella">★</button>
+                        <button onclick="selectShape('ring')" id="btn-shape-ring" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Anillo">◎</button>
+                        <button onclick="selectShape('infinity')" id="btn-shape-infinity" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" text-xs" title="Infinito">∞</button>
+                        <button onclick="selectShape('heart')" id="btn-shape-heart" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" text-[10px]" title="Corazón">❤</button>
+                        <button onclick="selectShape('leaf')" id="btn-shape-leaf" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Hoja">🍃</button>
+                        <button onclick="selectShape('fire')" id="btn-shape-fire" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Fuego">🔥</button>
+                        <button onclick="selectShape('snow')" id="btn-shape-snow" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Nieve">❄</button>
+                        <button onclick="selectShape('bolt')" id="btn-shape-bolt" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Rayo">⚡</button>
+                        <button onclick="selectShape('code')" id="btn-shape-code" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" text-[9px] font-mono" title="Binario">01</button>
+                        <button onclick="selectShape('brackets')" id="btn-shape-brackets" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" text-[9px] font-mono" title="Código">{ }</button>
+                        <button onclick="selectShape('pacman')" id="btn-shape-pacman" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Pacman">ᗧ</button>
+                        <button onclick="selectShape('ghost')" id="btn-shape-ghost" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Fantasma">👻</button>
+                        <button onclick="selectShape('music')" id="btn-shape-music" class="shape-btn h-9 rounded bg-white/5 hover:bg-white/20 text-white flex items-center justify-center border border-transparent focus:border-[#00f3ff]" title="Música">♫</button>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2">
+                        <span class="text-sm text-gray-300 font-medium">Modo RGB</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="particleRgbSwitch" onchange="toggleParticleRGB(); saveSettings()" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00f3ff]"></div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Velocidad</label>
+                        <input type="range" min="0" max="5" step="0.5" id="particleSpeed" oninput="updateParticleSettings(); saveSettings()" class="w-full accent-[#00f3ff] h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Tamaño</label>
+                        <input type="range" min="0.5" max="3" step="0.1" value="1" id="particleSize" oninput="updateParticleSettings(); saveSettings()" class="w-full accent-[#00f3ff] h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Densidad</label>
+                        <input type="range" min="20" max="150" step="10" id="particleCount" onchange="initParticles(); saveSettings()" class="w-full accent-[#00f3ff] h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-b border-white/5">
+            <button onclick="toggleSection('secStyles')" class="w-full flex justify-between items-center py-5 text-left group focus:outline-none">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] group-hover:text-white transition-colors">2. Estilos Visuales</span>
+                <span class="text-gray-400 group-hover:text-[#00f3ff] transition-colors">
+                    <i id="icon-secStyles" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 -rotate-90"></i>
+                </span>
+            </button>
+
+            <div id="secStyles" class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                <div class="pb-6 space-y-6 pl-1">
+                    
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-2">Color de Fondo</label>
+                        <div class="flex gap-3 items-center">
+                            <input type="color" id="bgColor" oninput="updateGlobalColors()" onchange="saveSettings()" value="#ecfafc" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0">
+                            <span class="text-xs text-gray-500">Ambiente</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-2">Color Botones/Textos</label>
+                        <div class="flex gap-3 items-center">
+                            <input type="color" id="accentColor" oninput="updateGlobalColors()" onchange="saveSettings()" value="#5A7D84" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0">
+                            <span class="text-xs text-gray-500">Principal</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-2">Color Iconos</label>
+                        <div class="flex gap-3 items-center">
+                            <input type="color" id="iconColor" oninput="updateGlobalColors()" onchange="saveSettings()" value="#5A7D84" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0">
+                            <span class="text-xs text-gray-500">Decorativos</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400 font-bold uppercase">Animación Iconos RGB</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="iconRgbSwitch" onchange="toggleIconsRGB(); saveSettings()" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-pink-500 peer-checked:via-purple-500 peer-checked:to-indigo-500"></div>
+                        </label>
+                    </div>
+
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-white font-bold">Títulos</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="titleRgbSwitch" onchange="toggleTitleRGB(); saveSettings()" class="sr-only peer">
+                                <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-pink-500 peer-checked:via-purple-500 peer-checked:to-indigo-500"></div>
+                            </label>
+                        </div>
+                        
+                        <div id="gradientControls" class="grid grid-cols-2 gap-3 transition-opacity duration-300">
+                            <div>
+                                <label class="text-[10px] text-gray-400 block mb-1">Color Inicio</label>
+                                <input type="color" id="gradStart" oninput="updateGlobalColors()" onchange="saveSettings()" value="#5A7D84" class="w-full h-8 rounded cursor-pointer bg-transparent border border-white/10">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 block mb-1">Color Fin</label>
+                                <input type="color" id="gradEnd" oninput="updateGlobalColors()" onchange="saveSettings()" value="#1a1a1a" class="w-full h-8 rounded cursor-pointer bg-transparent border border-white/10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/5 flex items-center justify-between">
+                        <span class="text-sm text-white font-bold">Bordes Neón</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="borderRgbSwitch" onchange="toggleBorderRGB(); saveSettings()" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00f3ff]"></div>
+                        </label>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="resetStylesOnly()" class="w-full py-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-bold uppercase tracking-widest text-[10px] rounded-lg transition-all duration-300 border border-white/5 hover:border-white/20 flex items-center justify-center gap-2 group">
+                            <i data-lucide="rotate-ccw" class="w-3 h-3 group-hover:-rotate-180 transition-transform duration-500"></i>
+                            Restablecer Colores
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-b border-white/5">
+            <button onclick="toggleSection('secFrame')" class="w-full flex justify-between items-center py-5 text-left group focus:outline-none">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] group-hover:text-white transition-colors">3. Marco Foto (20)</span>
+                <span class="text-gray-400 group-hover:text-[#00f3ff] transition-colors">
+                    <i id="icon-secFrame" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 -rotate-90"></i>
+                </span>
+            </button>
+
+            <div id="secFrame" class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                <div class="pb-6 space-y-4 pl-1">
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300 font-medium">Modo RGB + Admin</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="frameRgbSwitch" onchange="toggleFrameRGB(); saveSettings()" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-pink-500"></div>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-5 gap-2 pt-2">
+                        <button onclick="selectFrameStyle(1)" id="btn-frame-1" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">1</button>
+                        <button onclick="selectFrameStyle(2)" id="btn-frame-2" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">2</button>
+                        <button onclick="selectFrameStyle(3)" id="btn-frame-3" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">3</button>
+                        <button onclick="selectFrameStyle(4)" id="btn-frame-4" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">4</button>
+                        <button onclick="selectFrameStyle(5)" id="btn-frame-5" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">5</button>
+                        <button onclick="selectFrameStyle(6)" id="btn-frame-6" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">6</button>
+                        <button onclick="selectFrameStyle(7)" id="btn-frame-7" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">7</button>
+                        <button onclick="selectFrameStyle(8)" id="btn-frame-8" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">8</button>
+                        <button onclick="selectFrameStyle(9)" id="btn-frame-9" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">9</button>
+                        <button onclick="selectFrameStyle(10)" id="btn-frame-10" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">10</button>
+                        <button onclick="selectFrameStyle(11)" id="btn-frame-11" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">11</button>
+                        <button onclick="selectFrameStyle(12)" id="btn-frame-12" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">12</button>
+                        <button onclick="selectFrameStyle(13)" id="btn-frame-13" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">13</button>
+                        <button onclick="selectFrameStyle(14)" id="btn-frame-14" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">14</button>
+                        <button onclick="selectFrameStyle(15)" id="btn-frame-15" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">15</button>
+                        <button onclick="selectFrameStyle(16)" id="btn-frame-16" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">16</button>
+                        <button onclick="selectFrameStyle(17)" id="btn-frame-17" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">17</button>
+                        <button onclick="selectFrameStyle(18)" id="btn-frame-18" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">18</button>
+                        <button onclick="selectFrameStyle(19)" id="btn-frame-19" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">19</button>
+                        <button onclick="selectFrameStyle(20)" id="btn-frame-20" class="frame-btn h-8 rounded bg-white/5 hover:bg-white/20 text-white font-mono text-xs border border-transparent flex items-center justify-center">20</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="border-b border-white/5">
+            <button onclick="toggleSection('secSound')" class="w-full flex justify-between items-center py-5 text-left group focus:outline-none">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] group-hover:text-white transition-colors">4. Sonidos UI</span>
+                <span class="text-gray-400 group-hover:text-[#00f3ff] transition-colors">
+                    <i id="icon-secSound" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 -rotate-90"></i>
+                </span>
+            </button>
+
+            <div id="secSound" class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                <div class="pb-6 flex items-center justify-between pl-1">
+                    <span class="text-sm text-gray-300 font-medium">Efectos Sonoros</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="soundSwitch" onchange="saveSettings()" class="sr-only peer">
+                        <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const panel = document.getElementById('settingsPanel');
+    let currentShape = 'circle';
+    let currentFrameStyle = 0; 
+
+    function toggleSettings() {
+        if(panel.classList.contains('translate-x-full')) {
+            panel.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden'; 
+            if(window.playSound) playSound('click');
+        } else {
+            panel.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function toggleSection(sectionId) {
+        const allSections = document.querySelectorAll('.accordion-content');
+        const allIcons = document.querySelectorAll('[id^="icon-sec"]');
+        allSections.forEach(sec => { if(sec.id !== sectionId) sec.style.maxHeight = '0'; });
+        allIcons.forEach(icon => { if(icon.id !== 'icon-' + sectionId) icon.classList.add('-rotate-90'); });
+
+        const currentSection = document.getElementById(sectionId);
+        const currentIcon = document.getElementById('icon-' + sectionId);
+
+        if (!currentSection.style.maxHeight || currentSection.style.maxHeight === '0px') {
+            currentSection.style.maxHeight = '1000px'; 
+            currentIcon.classList.remove('-rotate-90');
+        } else {
+            currentSection.style.maxHeight = '0';
+            currentIcon.classList.add('-rotate-90');
+        }
+    }
+
+    function selectShape(shape) {
+        currentShape = shape;
+        if(window.setParticleShape) window.setParticleShape(shape);
+        document.querySelectorAll('.shape-btn').forEach(btn => btn.classList.remove('border-[#00f3ff]', 'bg-white/20'));
+        const activeBtn = document.getElementById('btn-shape-' + shape);
+        if(activeBtn) activeBtn.classList.add('border-[#00f3ff]', 'bg-white/20');
+        saveSettings();
+    }
+
+    function resetStylesOnly() {
+        document.getElementById('titleRgbSwitch').checked = false;
+        document.getElementById('borderRgbSwitch').checked = false;
+        document.getElementById('iconRgbSwitch').checked = false;
+        
+        document.getElementById('bgColor').value = '#ecfafc'; 
+        document.getElementById('accentColor').value = '#5A7D84';
+        document.getElementById('iconColor').value = '#5A7D84';
+        document.getElementById('gradStart').value = '#5A7D84';
+        document.getElementById('gradEnd').value = '#1a1a1a';
+        
+        updateGlobalColors();
+        toggleTitleRGB();
+        toggleBorderRGB();
+        toggleIconsRGB();
+        saveSettings();
+        if(window.playSound) playSound('click');
+    }
+
+    function selectFrameStyle(id) {
+        currentFrameStyle = id;
+        document.querySelectorAll('.frame-btn').forEach(btn => btn.classList.remove('border-pink-500', 'text-pink-400', 'bg-white/20'));
+        const activeBtn = document.getElementById('btn-frame-' + id);
+        if(activeBtn) activeBtn.classList.add('border-pink-500', 'text-pink-400', 'bg-white/20');
+        
+        if(window.updateFrameDesign) window.updateFrameDesign(id);
+        saveSettings();
+    }
+
+    function toggleFrameRGB() {
+        if(window.toggleFrameRGB) window.toggleFrameRGB();
+    }
+
+    function saveSettings() {
+        const settings = {
+            pShape: currentShape,
+            pRgb: document.getElementById('particleRgbSwitch').checked,
+            pSpeed: document.getElementById('particleSpeed').value,
+            pSize: document.getElementById('particleSize').value,
+            pCount: document.getElementById('particleCount').value,
+            bgColor: document.getElementById('bgColor').value,
+            accent: document.getElementById('accentColor').value,
+            iconColor: document.getElementById('iconColor').value,
+            gradStart: document.getElementById('gradStart').value,
+            gradEnd: document.getElementById('gradEnd').value,
+            titleRgb: document.getElementById('titleRgbSwitch').checked,
+            borderRgb: document.getElementById('borderRgbSwitch').checked,
+            iconRgb: document.getElementById('iconRgbSwitch').checked,
+            
+            frameRgb: document.getElementById('frameRgbSwitch').checked,
+            frameStyle: currentFrameStyle,
+            
+            sound: document.getElementById('soundSwitch').checked
+        };
+        localStorage.setItem('cvSettings', JSON.stringify(settings));
+    }
+
+    // ... (El resto de tus funciones arriba se queda igual) ...
+
+    function loadSettings() {
+        const saved = localStorage.getItem('cvSettings');
+        if (!saved) return;
+
+        const s = JSON.parse(saved);
+
+        // 1. Restaurar Valores a los Inputs (Visualmente)
+        if(s.pShape) currentShape = s.pShape;
+        
+        const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+        const setCheck = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
+
+        // Partículas
+        setCheck('particleRgbSwitch', s.pRgb);
+        setVal('particleSpeed', s.pSpeed);
+        setVal('particleSize', s.pSize);
+        setVal('particleCount', s.pCount);
+        
+        // Estilos
+        setVal('bgColor', s.bgColor);
+        setVal('accentColor', s.accent);
+        setVal('iconColor', s.iconColor || '#5A7D84');
+        setVal('gradStart', s.gradStart);
+        setVal('gradEnd', s.gradEnd);
+        
+        setCheck('titleRgbSwitch', s.titleRgb);
+        setCheck('borderRgbSwitch', s.borderRgb);
+        setCheck('iconRgbSwitch', s.iconRgb);
+        
+        // Marcos
+        setCheck('frameRgbSwitch', s.frameRgb);
+        if(s.frameStyle) currentFrameStyle = s.frameStyle;
+        
+        setCheck('soundSwitch', s.sound);
+
+        // 2. APLICAR LÓGICA (Aquí forzamos que el cerebro le diga al cuerpo qué hacer)
+        
+        // Forzar estilos CSS
+        updateGlobalColors(); 
+        toggleTitleRGB();
+        toggleBorderRGB();
+        toggleIconsRGB();
+
+        // Forzar Marco
+        // Importante: Asegurar que el botón correcto esté resaltado
+        document.querySelectorAll('.frame-btn').forEach(btn => btn.classList.remove('border-pink-500', 'text-pink-400', 'bg-white/20'));
+        const activeFrameBtn = document.getElementById('btn-frame-' + currentFrameStyle);
+        if(activeFrameBtn) activeFrameBtn.classList.add('border-pink-500', 'text-pink-400', 'bg-white/20');
+        
+        if(window.updateFrameDesign) window.updateFrameDesign(currentFrameStyle); // Aplica el estilo
+        if(window.toggleFrameRGB) window.toggleFrameRGB(); // Aplica el modo RGB si el check está true
+        
+        // Forzar Partículas
+        // Seleccionamos visualmente el botón de forma
+        document.querySelectorAll('.shape-btn').forEach(btn => btn.classList.remove('border-[#00f3ff]', 'bg-white/20'));
+        const activeShapeBtn = document.getElementById('btn-shape-' + currentShape);
+        if(activeShapeBtn) activeShapeBtn.classList.add('border-[#00f3ff]', 'bg-white/20');
+
+        // IMPORTANTE: Enviar datos a base.html
+        if(window.setParticleShape) window.setParticleShape(currentShape);
+        if(window.setParticleRGB) window.setParticleRGB(s.pRgb); // Forzamos el valor booleano exacto
+        if(window.updateParticleSettings) window.updateParticleSettings();
+        if(window.initParticles) window.initParticles();
+    }
+
+    // Inicialización Robusta: Espera a que window.initParticles exista antes de cargar
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ocultar secciones iniciales
+        document.getElementById('secStyles').style.maxHeight = '0';
+        document.getElementById('secFrame').style.maxHeight = '0';
+        document.getElementById('secSound').style.maxHeight = '0';
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        
+        // INTENTO DE CARGA SEGURO:
+        // Intentamos cargar settings. Si base.html no está listo (initParticles no existe),
+        // reintentamos cada 100ms hasta 10 veces.
+        let attempts = 0;
+        const tryLoad = setInterval(() => {
+            attempts++;
+            if (window.initParticles && window.updateFrameState) {
+                // Base.html está listo, cargamos y cancelamos el intervalo
+                loadSettings();
+                clearInterval(tryLoad);
+                console.log("Settings cargados correctamente en intento: " + attempts);
+            } else if (attempts > 20) {
+                // Si tras 2 segundos no carga, forzamos la carga (por si acaso) y rendimos
+                loadSettings();
+                clearInterval(tryLoad);
+            }
+        }, 100);
+    });
+
+    const root = document.documentElement;
+
+    function updateGlobalColors() {
+        const bg = document.getElementById('bgColor').value; 
+        const accent = document.getElementById('accentColor').value;
+        const iconCol = document.getElementById('iconColor').value;
+        const start = document.getElementById('gradStart').value;
+        const end = document.getElementById('gradEnd').value;
+
+        root.style.setProperty('--bg-color', bg);
+        root.style.setProperty('--primary-color', accent);
+        root.style.setProperty('--icon-color', iconCol);
+        root.style.setProperty('--gradient-start', start);
+        root.style.setProperty('--gradient-end', end);
+    }
+
+    function toggleTitleRGB() {
+        const isRGB = document.getElementById('titleRgbSwitch').checked;
+        document.body.classList.toggle('rgb-titles', isRGB);
+        const controls = document.getElementById('gradientControls');
+        if(controls) {
+            controls.style.opacity = isRGB ? '0.3' : '1';
+            controls.style.pointerEvents = isRGB ? 'none' : 'auto';
+        }
+    }
+
+    function toggleBorderRGB() {
+        const isRGB = document.getElementById('borderRgbSwitch').checked;
+        document.body.classList.toggle('rgb-borders', isRGB);
+    }
+
+    function toggleIconsRGB() {
+        const isRGB = document.getElementById('iconRgbSwitch').checked;
+        document.body.classList.toggle('rgb-icons', isRGB);
+    }
+    
+    // Función llamada desde settings pero ejecutada en base.html (si existe)
+    function toggleFrameRGB() { 
+        if(window.toggleFrameRGB) window.toggleFrameRGB(); 
+    }
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if(!document.getElementById('soundSwitch').checked) return;
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'hover') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+            // VOLUMEN AUMENTADO: de 0.02 a 0.1
+            gainNode.gain.setValueAtTime(0.1, now); 
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.start(now);
+            osc.stop(now + 0.05);
+        } else if (type === 'click') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+            // VOLUMEN AUMENTADO: de 0.05 a 0.3
+            gainNode.gain.setValueAtTime(0.4, now); 
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        }
+    }
+
+    function toggleParticleRGB() { if(window.toggleParticleRGB) window.toggleParticleRGB(); }
+    function updateParticleSettings() { if(window.updateParticleSettings) window.updateParticleSettings(); }
+    function initParticles() { if(window.initParticles) window.initParticles(); }
+
+    document.addEventListener('mouseenter', e => {
+        if(e.target.tagName === 'BUTTON' || e.target.tagName === 'A') playSound('hover');
+    }, true);
+    document.addEventListener('click', e => {
+        if(e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.type === 'checkbox') playSound('click');
+    });
+</script>
