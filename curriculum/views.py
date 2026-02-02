@@ -1,12 +1,12 @@
 import os
-import requests  # <--- IMPORTANTE: Necesario para descargar los archivos de Cloudinary
+import requests
 from io import BytesIO
 from django.conf import settings
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
-from django.contrib.staticfiles import finders # Para buscar estáticos de forma segura
+from django.contrib.staticfiles import finders
 from .models import (
     DatosPersonales, ExperienciaLaboral, EstudioRealizado, 
     CursoCapacitacion, Reconocimiento, ProductoLaboral, VentaGarage
@@ -16,287 +16,137 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 
+# AHORA SÍ FUNCIONARÁ ESTA IMPORTACIÓN
+from .cv_settings import get_cv_styles
+
 # ==========================================
-# FUNCIÓN PARA GESTIONAR RUTAS (IMÁGENES Y CSS)
+# UTILIDADES
 # ==========================================
 def link_callback(uri, rel):
-    """
-    Ayuda a xhtml2pdf a encontrar las imágenes y estilos.
-    Soporta archivos locales (Static) y remotos (Cloudinary).
-    """
-    # 1. Si es una URL completa (ej: Cloudinary https://res.cloudinary...), déjala pasar
     if uri.startswith('http'):
         return uri
-
-    # 2. Configuración de rutas locales
-    sUrl = settings.STATIC_URL        # /static/
-    sRoot = settings.STATIC_ROOT      # carpeta staticfiles/
-    mUrl = settings.MEDIA_URL         # /media/
-    mRoot = settings.MEDIA_ROOT       # carpeta media/
-
-    # 3. Intentar convertir URL relativa a ruta absoluta del sistema
-    path = None
+    sUrl, sRoot = settings.STATIC_URL, settings.STATIC_ROOT
+    mUrl, mRoot = settings.MEDIA_URL, settings.MEDIA_ROOT
     
-    # Caso A: Es un archivo Media (pero local)
     if uri.startswith(mUrl):
         path = os.path.join(mRoot, uri.replace(mUrl, ""))
-    
-    # Caso B: Es un archivo Estático (CSS, JS, Logos del sitio)
     elif uri.startswith(sUrl):
         path = os.path.join(sRoot, uri.replace(sUrl, ""))
+    else:
+        path = ""
 
-    # 4. Verificar si el archivo existe en esa ruta construida
     if path and os.path.isfile(path):
         return path
-
-    # 5. SALVAVIDAS: Si no lo encontró en STATIC_ROOT, búscalo con los finders de Django
-    # (Esto ayuda si collectstatic falló o la ruta es distinta)
     if uri.startswith(sUrl):
-        found_path = finders.find(uri.replace(sUrl, ""))
-        if found_path:
-            return found_path
-
-    # Si todo falla, devuelve la URI original (xhtml2pdf intentará resolverla)
+        found = finders.find(uri.replace(sUrl, ""))
+        if found: return found
     return uri
 
-# ==========================================
-# VISTAS DE LA PÁGINA WEB
-# ==========================================
-
-def inicio(request):
-    perfil = DatosPersonales.objects.first()
-    return render(request, 'curriculum/inicio.html', {'perfil': perfil})
-
-def perfil(request):
-    perfil = DatosPersonales.objects.first()
-    return render(request, 'curriculum/datos_personales.html', {'perfil': perfil})
-
-def experiencia(request):
-    perfil = DatosPersonales.objects.first()
-    # ORDEN: Usamos el definido en models.py (-fecha_inicio)
-    experiencias = ExperienciaLaboral.objects.all()
-    return render(request, 'curriculum/experiencia.html', {'perfil': perfil, 'experiencias': experiencias})
-
-def educacion(request):
-    perfil = DatosPersonales.objects.first()
-    # ORDEN: Usamos el definido en models.py (-fecha_fin)
-    estudios = EstudioRealizado.objects.all()
-    return render(request, 'curriculum/educacion.html', {'perfil': perfil, 'educacion': estudios})
-
-def cursos(request):
-    perfil = DatosPersonales.objects.first()
-    # ORDEN: Usamos el definido en models.py (-fecha_realizacion)
-    cursos = CursoCapacitacion.objects.all()
-    return render(request, 'curriculum/cursos.html', {'perfil': perfil, 'cursos': cursos})
-
-def reconocimientos(request):
-    perfil = DatosPersonales.objects.first()
-    # ORDEN: Usamos el definido en models.py (-fecha)
-    reconocimientos = Reconocimiento.objects.all()
-    reconocimientos = Reconocimiento.objects.filter(visible=True).order_by('-fecha')
-    return render(request, 'curriculum/reconocimientos.html', {'perfil': perfil, 'reconocimientos': reconocimientos})
-
-def trabajos(request):
-    perfil = DatosPersonales.objects.first()
-    # ORDEN: Usamos el definido en models.py (-fecha)
-    proyectos = ProductoLaboral.objects.all()
-    return render(request, 'curriculum/proyectos.html', {'perfil': perfil, 'trabajos': proyectos})
-
-def venta(request):
-    perfil = DatosPersonales.objects.first()
-    # Ventas sí ordenamos por ID (último agregado)
-    productos = VentaGarage.objects.all().order_by('-fecha_publicacion')
-    return render(request, 'curriculum/venta.html', {'perfil': perfil, 'servicios': productos})
-
-def contacto(request):
-    perfil = DatosPersonales.objects.first()
-    return render(request, 'curriculum/contacto.html', {'perfil': perfil})
-
 def numerar_paginas(pdf_writer):
-    """
-    Recibe un PdfWriter con todo el contenido mezclado,
-    cuenta las páginas reales y estampa "Página X de Y" al final.
-    """
-    # 1. Guardamos el contenido actual en memoria para leerlo
     temp_buffer = BytesIO()
     pdf_writer.write(temp_buffer)
     temp_buffer.seek(0)
     reader = PdfReader(temp_buffer)
     total_pages = len(reader.pages)
-    
-    # 2. Creamos un nuevo escritor final
     final_writer = PdfWriter()
 
-    # 3. Iteramos cada página existente
     for i, page in enumerate(reader.pages):
-        # Crear un "lienzo" (canvas) temporal solo para el número
         packet = BytesIO()
-        # Usamos A4. Si tus PDFs adjuntos son de otro tamaño, esto se pondrá al fondo centrado en A4
         can = canvas.Canvas(packet, pagesize=A4)
-        
-        # Configuración del texto (Gris, pequeño, centrado)
         can.setFillColorRGB(0.5, 0.5, 0.5) 
         can.setFont("Helvetica", 9)
-        
-        # Texto: Página X de Total
-        texto = f"Página {i+1} de {total_pages}"
-        
-        # Dibujar centrado en la parte inferior (A4[0] es el ancho)
-        # 15mm desde abajo
-        can.drawCentredString(A4[0] / 2, 15 * mm, texto)
+        can.drawCentredString(A4[0]/2, 15*mm, f"Página {i+1} de {total_pages}")
         can.save()
-
-        # Mover al inicio del buffer del número
         packet.seek(0)
-        number_pdf = PdfReader(packet)
-        page_number_layer = number_pdf.pages[0]
-
-        # 4. FUSIONAR: Pegamos el número encima de la página original
-        page.merge_page(page_number_layer)
+        page.merge_page(PdfReader(packet).pages[0])
         final_writer.add_page(page)
-
     return final_writer
 
 # ==========================================
-# GENERADOR DE PDF (CORREGIDO PARA RENDER Y CLOUDINARY)
+# VISTAS HTML
 # ==========================================
-# ... (Imports y función link_callback igual que antes) ...
+def inicio(request):
+    return render(request, 'curriculum/inicio.html', {'perfil': DatosPersonales.objects.first()})
+def perfil(request):
+    return render(request, 'curriculum/datos_personales.html', {'perfil': DatosPersonales.objects.first()})
+def experiencia(request):
+    return render(request, 'curriculum/experiencia.html', {'perfil': DatosPersonales.objects.first(), 'experiencias': ExperienciaLaboral.objects.all()})
+def educacion(request):
+    return render(request, 'curriculum/educacion.html', {'perfil': DatosPersonales.objects.first(), 'educacion': EstudioRealizado.objects.all()})
+def cursos(request):
+    return render(request, 'curriculum/cursos.html', {'perfil': DatosPersonales.objects.first(), 'cursos': CursoCapacitacion.objects.all()})
+def reconocimientos(request):
+    return render(request, 'curriculum/reconocimientos.html', {'perfil': DatosPersonales.objects.first(), 'reconocimientos': Reconocimiento.objects.filter(visible=True).order_by('-fecha')})
+def trabajos(request):
+    return render(request, 'curriculum/proyectos.html', {'perfil': DatosPersonales.objects.first(), 'trabajos': ProductoLaboral.objects.all()})
+def venta(request):
+    return render(request, 'curriculum/venta.html', {'perfil': DatosPersonales.objects.first(), 'servicios': VentaGarage.objects.all().order_by('-fecha_publicacion')})
+def contacto(request):
+    return render(request, 'curriculum/contacto.html', {'perfil': DatosPersonales.objects.first()})
 
 # ==========================================
-# GENERADOR DE PDF (ACTUALIZADO)
+# GENERADOR PDF
 # ==========================================
 def generar_cv(request):
     perfil = DatosPersonales.objects.first()
-    
-    # 1. FILTROS Y OBTENCIÓN DE DATOS
-    incluir_exp = request.GET.get('experiencia') == 'on' if request.GET.get('origen') == 'personalizado' else True
-    incluir_edu = request.GET.get('educacion') == 'on' if request.GET.get('origen') == 'personalizado' else True
-    incluir_rec = request.GET.get('reconocimientos') == 'on' if request.GET.get('origen') == 'personalizado' else True
-    incluir_pro = request.GET.get('proyectos') == 'on' if request.GET.get('origen') == 'personalizado' else True
-    incluir_ven = request.GET.get('venta') == 'on' if request.GET.get('origen') == 'personalizado' else True
+    styles = get_cv_styles(request) # Obtenemos estilos
 
+    # Filtros
+    origen = request.GET.get('origen')
+    incluir_exp = request.GET.get('experiencia') == 'on' if origen == 'personalizado' else True
+    incluir_edu = request.GET.get('educacion') == 'on' if origen == 'personalizado' else True
+    incluir_rec = request.GET.get('reconocimientos') == 'on' if origen == 'personalizado' else True
+    incluir_pro = request.GET.get('proyectos') == 'on' if origen == 'personalizado' else True
+    incluir_ven = request.GET.get('venta') == 'on' if origen == 'personalizado' else True
+
+    # Datos
     experiencias = ExperienciaLaboral.objects.filter(visible=True) if incluir_exp else []
     estudios = EstudioRealizado.objects.filter(visible=True) if incluir_edu else []
     cursos_lista = CursoCapacitacion.objects.filter(visible=True).order_by('-fecha_realizacion') if incluir_edu else []
-    
-    # AHORA TAMBIÉN TRAEMOS RECONOCIMIENTOS CON CERTIFICADO
     reconocimientos = Reconocimiento.objects.filter(visible=True).order_by('-fecha') if incluir_rec else []
-    
     proyectos = ProductoLaboral.objects.filter(visible=True) if incluir_pro else []
     ventas = VentaGarage.objects.filter(activo=True).order_by('-fecha_publicacion') if incluir_ven else []
 
     pdf_writer = PdfWriter()
     template = get_template('curriculum/cv_pdf.html') 
 
-    # --- PASO 1: PARTE SUPERIOR ---
-    context_part1 = {
-        'perfil': perfil,
-        'experiencias': experiencias,
-        'estudios': estudios,
-        'section_mode': 'top',
-        'MEDIA_URL': settings.MEDIA_URL,
-    }
-    html_1 = template.render(context_part1)
-    buffer_1 = BytesIO()
-    pisa.CreatePDF(html_1, dest=buffer_1, link_callback=link_callback)
-    buffer_1.seek(0)
-    for page in PdfReader(buffer_1).pages:
-        pdf_writer.add_page(page)
+    def render_part(mode, extra={}):
+        ctx = {'perfil': perfil, 'MEDIA_URL': settings.MEDIA_URL, 'section_mode': mode, 'styles': styles}
+        ctx.update(extra)
+        html = template.render(ctx)
+        buf = BytesIO()
+        pisa.CreatePDF(html, dest=buf, link_callback=link_callback)
+        buf.seek(0)
+        for p in PdfReader(buf).pages: pdf_writer.add_page(p)
 
-    # --- PASO 2: CURSOS EN CADENA ---
-    if cursos_lista:
-        context_cursos = {
-            'perfil': perfil,
-            'cursos': cursos_lista,
-            'section_mode': 'courses_list', 
-            'MEDIA_URL': settings.MEDIA_URL,
-        }
-        html_c = template.render(context_cursos)
-        buffer_c = BytesIO()
-        pisa.CreatePDF(html_c, dest=buffer_c, link_callback=link_callback)
-        buffer_c.seek(0)
-        for page in PdfReader(buffer_c).pages:
-            pdf_writer.add_page(page)
+    # 1. Principal
+    render_part('top', {'experiencias': experiencias, 'estudios': estudios})
+    # 2. Cursos
+    if cursos_lista: render_part('courses_list', {'cursos': cursos_lista})
+    # 3. Otros
+    if reconocimientos or proyectos or ventas: render_part('bottom', {'reconocimientos': reconocimientos, 'proyectos': proyectos, 'ventas': ventas})
+    # 4. Índice
+    if any(c.certificado_pdf for c in cursos_lista) or any(r.certificado_pdf for r in reconocimientos):
+        render_part('certificates_index', {'cursos': cursos_lista, 'reconocimientos': reconocimientos})
 
-    # --- PASO 3: PARTE INFERIOR ---
-    if reconocimientos or proyectos or ventas:
-        context_part3 = {
-            'perfil': perfil,
-            'reconocimientos': reconocimientos,
-            'proyectos': proyectos,
-            'ventas': ventas,
-            'section_mode': 'bottom',
-            'MEDIA_URL': settings.MEDIA_URL,
-        }
-        html_3 = template.render(context_part3)
-        buffer_3 = BytesIO()
-        pisa.CreatePDF(html_3, dest=buffer_3, link_callback=link_callback)
-        buffer_3.seek(0)
-        for page in PdfReader(buffer_3).pages:
-            pdf_writer.add_page(page)
-
-    # --- PASO 4: ÍNDICE DE CERTIFICADOS (Cursos + Reconocimientos) ---
-    tiene_certs_cursos = any(c.certificado_pdf for c in cursos_lista)
-    tiene_certs_reco = any(r.certificado_pdf for r in reconocimientos)
-    
-    if tiene_certs_cursos or tiene_certs_reco:
-        context_idx = {
-            'perfil': perfil,
-            'cursos': cursos_lista,
-            'reconocimientos': reconocimientos, # Pasamos también reconocimientos
-            'section_mode': 'certificates_index',
-            'MEDIA_URL': settings.MEDIA_URL,
-        }
-        html_idx = template.render(context_idx)
-        buffer_idx = BytesIO()
-        pisa.CreatePDF(html_idx, dest=buffer_idx, link_callback=link_callback)
-        buffer_idx.seek(0)
-        
-        reader_idx = PdfReader(buffer_idx)
-        for page in reader_idx.pages:
-            pdf_writer.add_page(page)
-
-    # --- PASO 5: ADJUNTAR PDFs DE CURSOS ---
-    for curso in cursos_lista:
-        if curso.certificado_pdf:
+    # 5. Adjuntar PDFs
+    for item in list(cursos_lista) + list(reconocimientos):
+        if item.certificado_pdf:
             try:
-                pdf_url = curso.certificado_pdf.url
-                response_pdf = requests.get(pdf_url, timeout=10)
-                if response_pdf.status_code == 200:
-                    cert_buffer = BytesIO(response_pdf.content)
-                    reader_cert = PdfReader(cert_buffer)
-                    for page in reader_cert.pages:
-                        pdf_writer.add_page(page)
-            except Exception as e:
-                print(f"Error adjuntando certificado curso {curso.nombre_curso}: {e}")
+                url = item.certificado_pdf.url
+                if not url.startswith('http'): url = request.build_absolute_uri(url)
+                res = requests.get(url, timeout=15)
+                if res.status_code == 200:
+                    for p in PdfReader(BytesIO(res.content)).pages: pdf_writer.add_page(p)
+            except: pass
 
-    # --- PASO 5.5: ADJUNTAR PDFs DE RECONOCIMIENTOS (NUEVO) ---
-    for rec in reconocimientos:
-        if rec.certificado_pdf:
-            try:
-                pdf_url = rec.certificado_pdf.url
-                response_pdf = requests.get(pdf_url, timeout=10)
-                if response_pdf.status_code == 200:
-                    cert_buffer = BytesIO(response_pdf.content)
-                    reader_cert = PdfReader(cert_buffer)
-                    for page in reader_cert.pages:
-                        pdf_writer.add_page(page)
-            except Exception as e:
-                print(f"Error adjuntando certificado reconocimiento {rec.nombre}: {e}")
-
-    # --- PASO 6: FINALIZAR Y ENVIAR ---
-    try:
-        pdf_writer_numerado = numerar_paginas(pdf_writer)
-    except Exception as e:
-        print(f"Error numerando páginas: {e}")
-        pdf_writer_numerado = pdf_writer 
-
-    final_buffer = BytesIO()
-    pdf_writer_numerado.write(final_buffer)
+    # 6. Finalizar
+    try: final_writer = numerar_paginas(pdf_writer)
+    except: final_writer = pdf_writer
     
-    response = HttpResponse(final_buffer.getvalue(), content_type='application/pdf')
-    safe_name = "".join([c for c in perfil.nombres if c.isalnum() or c in (' ', '_')]).strip()
-    filename = f"CV_Personalizado_{safe_name}.pdf"
-    response['Content-Disposition'] = f'inline; filename="{filename}"'
-    
+    out = BytesIO()
+    final_writer.write(out)
+    response = HttpResponse(out.getvalue(), content_type='application/pdf')
+    name = "".join([c for c in (perfil.nombres if perfil else "CV") if c.isalnum()])
+    response['Content-Disposition'] = f'inline; filename="CV_{name}.pdf"'
     return response

@@ -5,49 +5,59 @@
     <meta charset="UTF-8">
     <title>CV - {{ perfil.nombres }}</title>
     <style>
-        @page {
-            size: a4;
-            margin: 1.5cm;
+        @page { size: a4; margin: 1.5cm; }
+        body { 
+            font-family: {{ styles.font_family }}; 
+            color: #333; font-size: 11pt; line-height: 1.4; 
         }
-        body { font-family: Helvetica, Arial, sans-serif; color: #333; font-size: 11pt; line-height: 1.4; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
         td { vertical-align: top; padding: 0; }
         
-        /* Estilos Header */
-        .header-title { font-size: 32pt; font-weight: bold; font-style: italic; text-transform: uppercase; color: #1a1a1a; line-height: 0.9; }
-        .header-subtitle { font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #5A7D84; margin-top: 5px; letter-spacing: 2px; }
-        .divider { height: 4px; background-color: #BBD2D6; width: 100px; margin-top: 15px; margin-bottom: 30px; border-radius: 2px; }
+        /* HEADER: Colores Independientes */
+        .header-title-name { 
+            font-size: 32pt; font-weight: bold; font-style: italic; text-transform: uppercase; 
+            color: {{ styles.name_color }}; /* COLOR NOMBRE */
+            line-height: 0.9; 
+        }
+        .header-title-surname { 
+            font-size: 32pt; font-weight: bold; font-style: italic; text-transform: uppercase; 
+            color: {{ styles.surname_color }}; /* COLOR APELLIDO */
+            line-height: 0.9; 
+        }
         
-        /* Foto y Datos */
-        .profile-img { width: 140px; height: 140px; border-radius: 15px; border: 4px solid #BBD2D6; }
-        .data-label { font-size: 8pt; font-weight: bold; text-transform: uppercase; color: #5A7D84; margin-bottom: 2px; }
+        .header-subtitle { 
+            font-size: 14pt; font-weight: bold; text-transform: uppercase; 
+            color: {{ styles.accent_color }}; margin-top: 5px; letter-spacing: 2px; 
+        }
+        .divider { 
+            height: 4px; background-color: {{ styles.line_color }}; 
+            width: 100px; margin-top: 15px; margin-bottom: 30px; border-radius: 2px; 
+        }
+        
+        /* Resto de estilos usando variables generales */
+        .profile-img { width: 140px; height: 140px; border-radius: 15px; border: 4px solid {{ styles.line_color }}; }
+        .data-label { font-size: 8pt; font-weight: bold; text-transform: uppercase; color: {{ styles.accent_color }}; margin-bottom: 2px; }
         .data-value { font-size: 10pt; font-weight: bold; color: #1a1a1a; margin-bottom: 10px; }
 
-        /* Secciones */
-        .section-header { margin-top: 25px; margin-bottom: 15px; border-bottom: 2px solid #1a1a1a; padding-bottom: 5px; }
-        .section-title { font-size: 14pt; font-weight: bold; font-style: italic; text-transform: uppercase; color: #1a1a1a; }
+        .section-header { margin-top: 25px; margin-bottom: 15px; border-bottom: 2px solid {{ styles.header_color }}; padding-bottom: 5px; }
+        .section-title { font-size: 14pt; font-weight: bold; font-style: italic; text-transform: uppercase; color: {{ styles.header_color }}; }
         
-        /* Items */
-        .item-row { margin-bottom: 15px; }
         .item-title { font-size: 12pt; font-weight: bold; color: #1a1a1a; }
-        .item-subtitle { font-size: 10pt; font-weight: bold; color: #5A7D84; text-transform: uppercase; }
+        .item-subtitle { font-size: 10pt; font-weight: bold; color: {{ styles.accent_color }}; text-transform: uppercase; }
         .date-badge { font-size: 9pt; color: #666; font-style: italic; text-align: right; }
         .description { font-size: 10pt; text-align: justify; color: #444; margin-top: 5px; }
-        
-        /* Ajuste de Estilos Generales */
-        html, body { height: auto; margin: 0; padding: 0; }
-        table { page-break-inside: auto; }
-        tr { page-break-inside: avoid; }
     </style>
 </head>
 <body>
 
     {% if section_mode == 'top' %}
-    
     <table style="margin-bottom: 20px;">
         <tr>
             <td width="75%">
-                <div class="header-title">{{ perfil.nombres }}<br><span style="color: #5A7D84;">{{ perfil.apellidos }}</span></div>
+                <div>
+                    <span class="header-title-name">{{ perfil.nombres }}</span><br>
+                    <span class="header-title-surname">{{ perfil.apellidos }}</span>
+                </div>
                 <div class="header-subtitle">{{ perfil.profesion|default:"Profesional" }}</div>
                 <div class="divider"></div>
             </td>
@@ -57,10 +67,14 @@
 
     <table style="margin-bottom: 30px;">
         <tr>
+            {% if styles.show_photo %}
             <td width="20%" valign="top">
-                {% if perfil.foto %}<img src="{{ perfil.foto.url }}" class="profile-img">{% else %}<div style="width:140px; height:140px; background:#F0F4F5; border:4px solid #BBD2D6; border-radius:15px;"></div>{% endif %}
+                {% if perfil.foto %}<img src="{{ perfil.foto.url }}" class="profile-img">{% else %}<div style="width:140px; height:140px; background:#F0F4F5; border:4px solid {{ styles.line_color }}; border-radius:15px;"></div>{% endif %}
             </td>
             <td width="80%" style="padding-left: 25px;">
+            {% else %}
+            <td width="100%">
+            {% endif %}
                 <table>
                     <tr>
                         <td width="50%" valign="top">
@@ -76,19 +90,18 @@
                     </tr>
                 </table>
                 {% if perfil.descripcion_perfil %}
-                <div style="margin-top: 15px; border-left: 3px solid #5A7D84; padding-left: 10px; color: #555; font-style: italic; font-size: 10pt;">"{{ perfil.descripcion_perfil }}"</div>
+                <div style="margin-top: 15px; border-left: 3px solid {{ styles.accent_color }}; padding-left: 10px; color: #555; font-style: italic; font-size: 10pt;">"{{ perfil.descripcion_perfil }}"</div>
                 {% endif %}
             </td>
         </tr>
     </table>
-
     {% if experiencias %}
     <div class="section-header"><div class="section-title">Experiencia Profesional</div></div>
     {% for exp in experiencias %}
     <table class="item-row" keep-together="always"> 
         <tr>
             <td width="75%"><div class="item-title">{{ exp.cargo }}</div><div class="item-subtitle">{{ exp.empresa }}</div></td>
-            <td width="25%" align="right" valign="top"><div class="date-badge">{{ exp.fecha_inicio }} - {{ exp.fecha_fin }}</div></td>
+            <td width="25%" align="right"><div class="date-badge">{{ exp.fecha_inicio }} - {{ exp.fecha_fin }}</div></td>
         </tr>
         <tr><td colspan="2"><div class="description">{{ exp.descripcion|linebreaksbr }}</div></td></tr>
     </table>
@@ -100,125 +113,33 @@
     {% for edu in estudios %}
     <table class="item-row" keep-together="always">
         <tr>
-            <td width="75%"><div class="item-title">{{ edu.titulo }}</div><div class="item-subtitle" style="color: #666; font-weight: normal;">{{ edu.institucion }}</div></td>
+            <td width="75%"><div class="item-title">{{ edu.titulo }}</div><div class="item-subtitle" style="color:#666; font-weight:normal;">{{ edu.institucion }}</div></td>
             <td width="25%" align="right"><div class="date-badge">{{ edu.fecha_inicio }} - {{ edu.fecha_fin }}</div></td>
         </tr>
     </table>
     {% endfor %}
     {% endif %}
-
-    {% endif %} 
+    {% endif %}
 
     {% if section_mode == 'courses_list' %}
     <div class="section-header"><div class="section-title">Formación Continua</div></div>
     {% for curso in cursos %}
-    <table class="item-row" style="margin-bottom: 8px;">
-        <tr>
-            <td width="75%">
-                <div class="item-title">{{ curso.nombre_curso }}</div>
-                <div class="item-subtitle">{{ curso.institucion }}</div>
-            </td>
-            <td width="25%" align="right">
-                <div class="date-badge">{{ curso.fecha_realizacion|date:"m/Y" }}</div>
-                <div style="font-size: 8pt; color: #5A7D84;">{{ curso.horas }} Horas</div>
-            </td>
-        </tr>
-    </table>
+    <table class="item-row" style="margin-bottom:8px;"><tr><td width="75%"><div class="item-title">{{ curso.nombre_curso }}</div><div class="item-subtitle">{{ curso.institucion }}</div></td><td width="25%" align="right"><div class="date-badge">{{ curso.fecha_realizacion|date:"m/Y" }}</div><div style="font-size:8pt; color:{{ styles.accent_color }};">{{ curso.horas }} Horas</div></td></tr></table>
     {% endfor %}
     {% endif %}
 
     {% if section_mode == 'bottom' %}
-    
-        {% if reconocimientos %}
-        <div class="section-header"><div class="section-title">Reconocimientos y Logros</div></div>
-        {% for rec in reconocimientos %}
-        <table class="item-row" keep-together="always">
-            <tr>
-                <td width="75%">
-                    <div class="item-title">{{ rec.nombre }}</div>
-                    <div class="item-subtitle">{{ rec.institucion }}</div>
-                </td>
-                <td width="25%" align="right" valign="top">
-                    <div class="date-badge">{{ rec.fecha|date:"Y" }}</div>
-                </td>
-            </tr>
-            {% if rec.codigo_registro %}
-            <tr>
-                <td colspan="2"><div class="description" style="font-style: italic; color: #666;">Registro: {{ rec.codigo_registro }}</div></td>
-            </tr>
-            {% endif %}
-        </table>
-        {% endfor %}
-        {% endif %}
-
-        {% if proyectos %}
-        <div class="section-header"><div class="section-title">Portafolio de Proyectos</div></div>
-        {% for pro in proyectos %}
-        <table class="item-row" keep-together="always">
-            <tr>
-                <td width="75%">
-                    <div class="item-title">{{ pro.nombre }}</div>
-                </td>
-                <td width="25%" align="right">
-                    <div class="date-badge">{{ pro.fecha|date:"Y" }}</div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2"><div class="description">{{ pro.descripcion|linebreaksbr }}</div></td>
-            </tr>
-        </table>
-        {% endfor %}
-        {% endif %}
-
-        {% if ventas %}
-        <div class="section-header"><div class="section-title">Catálogo Venta de Garage</div></div>
-        {% for item in ventas %}
-        <table class="item-row" keep-together="always" style="border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
-            <tr>
-                <td width="70%">
-                    <div class="item-title">{{ item.nombre_producto }}</div>
-                    <div style="font-size: 8pt; color: #888;">Publicado el: {{ item.fecha_publicacion|date:"d/m/Y" }}</div>
-                    <div class="description">{{ item.descripcion|linebreaksbr }}</div>
-                </td>
-                <td width="30%" align="right" valign="top">
-                    <div style="font-size: 11pt; font-weight: bold; color: #5A7D84;">${{ item.precio }}</div>
-                    <div style="font-size: 8pt;">Stock: {{ item.stock }} | {{ item.estado }}</div>
-                </td>
-            </tr>
-        </table>
-        {% endfor %}
-        {% endif %}
+        {% if reconocimientos %}<div class="section-header"><div class="section-title">Reconocimientos</div></div>{% for rec in reconocimientos %}<table class="item-row"><tr><td width="75%"><div class="item-title">{{ rec.nombre }}</div><div class="item-subtitle">{{ rec.institucion }}</div></td><td width="25%" align="right"><div class="date-badge">{{ rec.fecha|date:"Y" }}</div></td></tr></table>{% endfor %}{% endif %}
+        {% if proyectos %}<div class="section-header"><div class="section-title">Proyectos</div></div>{% for pro in proyectos %}<table class="item-row"><tr><td width="75%"><div class="item-title">{{ pro.nombre }}</div></td><td width="25%" align="right"><div class="date-badge">{{ pro.fecha|date:"Y" }}</div></td></tr><tr><td colspan="2"><div class="description">{{ pro.descripcion|linebreaksbr }}</div></td></tr></table>{% endfor %}{% endif %}
+        {% if ventas %}<div class="section-header"><div class="section-title">Catálogo Venta</div></div>{% for item in ventas %}<table class="item-row"><tr><td width="70%"><div class="item-title">{{ item.nombre_producto }}</div><div class="description">{{ item.descripcion }}</div></td><td width="30%" align="right"><div style="font-size:11pt; font-weight:bold; color:{{ styles.accent_color }};">${{ item.precio }}</div></td></tr></table>{% endfor %}{% endif %}
     {% endif %}
 
     {% if section_mode == 'certificates_index' %}
-        <div class="section-header"><div class="section-title">Anexo: Documentación de Respaldo</div></div>
-        
+        <div class="section-header"><div class="section-title">Anexo: Documentación</div></div>
         <table style="margin-left: 15px;">
-            {% for curso in cursos %}
-                {% if curso.certificado_pdf %}
-                <tr>
-                    <td width="5%" style="font-weight: bold; color: #5A7D84;">•</td>
-                    <td width="95%" style="padding-bottom: 8px;">
-                        <div style="font-size: 11pt; font-weight: bold;">Certificado: {{ curso.nombre_curso }}</div>
-                        <div style="font-size: 9pt; color: #666;">Emitido por: {{ curso.institucion }}</div>
-                    </td>
-                </tr>
-                {% endif %}
-            {% endfor %}
-
-            {% for rec in reconocimientos %}
-                {% if rec.certificado_pdf %}
-                <tr>
-                    <td width="5%" style="font-weight: bold; color: #D4AF37;">★</td>
-                    <td width="95%" style="padding-bottom: 8px;">
-                        <div style="font-size: 11pt; font-weight: bold;">Premio/Reconocimiento: {{ rec.nombre }}</div>
-                        <div style="font-size: 9pt; color: #666;">Otorgado por: {{ rec.institucion }}</div>
-                    </td>
-                </tr>
-                {% endif %}
-            {% endfor %}
+            {% for curso in cursos %}{% if curso.certificado_pdf %}<tr><td width="5%" style="color:{{ styles.accent_color }};">•</td><td width="95%"><div style="font-weight:bold;">Certificado: {{ curso.nombre_curso }}</div></td></tr>{% endif %}{% endfor %}
+            {% for rec in reconocimientos %}{% if rec.certificado_pdf %}<tr><td width="5%" style="color:#D4AF37;">★</td><td width="95%"><div style="font-weight:bold;">Premio: {{ rec.nombre }}</div></td></tr>{% endif %}{% endfor %}
         </table>
     {% endif %}
-
 </body>
 </html>
