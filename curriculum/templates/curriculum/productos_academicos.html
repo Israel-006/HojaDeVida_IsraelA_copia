@@ -1,0 +1,73 @@
+{% extends 'curriculum/base.html' %}
+{% load static %}
+
+{% block title %}Productos Académicos - {{ perfil.nombres }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-20 relative z-10">
+    
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[10%] right-[10%] w-[500px] h-[500px] bg-[#BBD2D6]/10 blur-[100px] rounded-full"></div>
+        <div class="absolute bottom-[10%] left-[10%] w-[400px] h-[400px] bg-[#5A7D84]/10 blur-[100px] rounded-full"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="text-center mb-20 fade-in">
+            <div class="flex items-center justify-center gap-4 mb-6">
+                <div class="h-1.5 w-16 bg-[#BBD2D6] rounded-full"></div>
+                <span class="text-gray-400 font-black tracking-[0.2em] text-sm uppercase">Investigación</span>
+                <div class="h-1.5 w-16 bg-[#BBD2D6] rounded-full"></div>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-black text-[#1a1a1a] mb-6 tracking-tighter">
+                PRODUCTOS <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5A7D84] to-[#1a1a1a] italic pr-4">ACADÉMICOS</span>
+            </h1>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            {% for item in productos_academicos %}
+            <article class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 overflow-hidden flex flex-col h-full">
+                
+                <div class="p-8 flex flex-col flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#5A7D84]/10 text-[#5A7D84] text-xs font-bold tracking-widest uppercase border border-[#5A7D84]/20">
+                            {{ item.clasificador }}
+                        </span>
+                        <i data-lucide="book-open" class="w-5 h-5 text-gray-300 group-hover:text-[#5A7D84] transition-colors"></i>
+                    </div>
+
+                    <h3 class="text-2xl font-black text-[#1a1a1a] mb-3 group-hover:text-[#5A7D84] transition-colors leading-tight">
+                        {{ item.nombre }}
+                    </h3>
+                    
+                    <p class="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4 flex-grow">
+                        {{ item.descripcion }}
+                    </p>
+                    
+                    <div class="w-full h-1 bg-gray-50 rounded-full mt-4 overflow-hidden">
+                        <div class="h-full bg-[#5A7D84] w-0 group-hover:w-full transition-all duration-700 ease-out"></div>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <div class="col-span-full py-20 text-center">
+                <div class="inline-block p-6 rounded-full bg-gray-50 mb-6">
+                    <i data-lucide="library" class="w-12 h-12 text-gray-300"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-400">Aún no hay recursos publicados</h3>
+                <p class="text-gray-400 mt-2">Estamos trabajando en nuevas investigaciones.</p>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="mt-20 text-center">
+            <a href="{% url 'inicio' %}" class="inline-flex items-center gap-2 text-gray-500 hover:text-[#5A7D84] font-bold transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

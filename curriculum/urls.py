@@ -13,4 +13,5 @@ urlpatterns = [
     path('contacto/', views.contacto, name='contacto'),
     # Esta es la ruta que faltaba y causaba el error
     path('generar-cv/', views.generar_cv, name='generar_cv'),
+    path('productos-academicos/', views.productos_academicos, name='productos_academicos'),
 ]

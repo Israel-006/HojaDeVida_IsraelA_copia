@@ -72,6 +72,7 @@
                 <a href="{% url 'reconocimientos' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32"><i data-lucide="trophy" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3"></i><span class="text-[10px] font-black uppercase tracking-widest">Logros</span></a>
                 <a href="{% url 'trabajos' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32"><i data-lucide="folder-git" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3"></i><span class="text-[10px] font-black uppercase tracking-widest">Proyectos</span></a>
                 <a href="{% url 'venta' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32"><i data-lucide="shopping-bag" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3"></i><span class="text-[10px] font-black uppercase tracking-widest">Venta</span></a>
+                <a href="{% url 'productos_academicos' %}" class="flex flex-col items-center justify-center p-4 bg-[#F0F4F5] rounded-3xl hover:bg-[#5A7D84] hover:text-white transition-all group/btn text-center h-32"><i data-lucide="archive" size="28" class="text-[#5A7D84] group-hover/btn:text-white mb-3"></i><span class="text-[10px] font-black uppercase tracking-widest">Productos Académicos</span></a>
             </div>
         </div>
     </div>
@@ -127,6 +128,15 @@
                                 <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5A7D84]"></div>
                             </label>
                         </div>
+                        
+                        <div class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                            <span class="font-bold text-sm text-gray-700">Investigación (Académico)</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="productos_academicos" class="sr-only peer" checked onchange="updatePreview()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5A7D84]"></div>
+                            </label>
+                        </div>
+                        
                         <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 mt-4">
                             <span class="font-bold text-sm text-gray-700">Incluir Fotografía</span>
                             <label class="relative inline-flex items-center cursor-pointer">
@@ -214,6 +224,8 @@
                     <div id="prev_sec_reconocimientos"><div class="border-b-2 mb-2 pb-1 prev-borders" style="border-color: #1a1a1a;"><span class="text-sm font-bold italic uppercase prev-titles text-[#1a1a1a]">Logros y Premios</span></div><div class="h-2 bg-gray-300 rounded w-1/2 opacity-40"></div></div>
                     <div id="prev_sec_proyectos"><div class="border-b-2 mb-2 pb-1 prev-borders" style="border-color: #1a1a1a;"><span class="text-sm font-bold italic uppercase prev-titles text-[#1a1a1a]">Proyectos</span></div><div class="h-2 bg-gray-300 rounded w-full opacity-40"></div></div>
                     <div id="prev_sec_venta"><div class="border-b-2 mb-2 pb-1 prev-borders" style="border-color: #1a1a1a;"><span class="text-sm font-bold italic uppercase prev-titles text-[#1a1a1a]">Catálogo Venta</span></div><div class="grid grid-cols-2 gap-2 opacity-40"><div class="h-6 border border-dashed border-gray-400 rounded"></div><div class="h-6 border border-dashed border-gray-400 rounded"></div></div></div>
+                    
+                    <div id="prev_sec_productos_academicos"><div class="border-b-2 mb-2 pb-1 prev-borders" style="border-color: #1a1a1a;"><span class="text-sm font-bold italic uppercase prev-titles text-[#1a1a1a]">Investigación</span></div><div class="space-y-2 opacity-40"><div class="h-2 bg-gray-300 rounded w-full"></div><div class="h-2 bg-gray-300 rounded w-4/5"></div></div></div>
                 </div>
             </div>
         </div>
@@ -221,8 +233,47 @@
 </div>
 
 <script>
-    function openModal() { document.getElementById('cvModal').classList.remove('hidden'); document.getElementById('main-content').classList.add('blur-sm'); updatePreview(); }
-    function closeModal() { document.getElementById('cvModal').classList.add('hidden'); document.getElementById('main-content').classList.remove('blur-sm'); }
+    // --- LÓGICA DEL MODAL Y UI (ACTUALIZADA) ---
+    
+    function openModal() { 
+        // 1. Mostrar Modal y desenfocar fondo
+        document.getElementById('cvModal').classList.remove('hidden'); 
+        document.getElementById('main-content').classList.add('blur-sm'); 
+        
+        // 2. OCULTAR LA HAMBURGUESA (Menú)
+        const ham = document.getElementById('hamburger-btn');
+        if(ham) {
+            ham.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // 3. OCULTAR LA TUERCA (Configuración)
+        // Buscamos el botón específico que tiene la clase 'fixed' y la función toggleSettings
+        const settingsBtn = document.querySelector('button[onclick="toggleSettings()"].fixed');
+        if(settingsBtn) {
+            settingsBtn.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        updatePreview(); 
+    }
+
+    function closeModal() { 
+        // 1. Ocultar Modal y enfocar fondo
+        document.getElementById('cvModal').classList.add('hidden'); 
+        document.getElementById('main-content').classList.remove('blur-sm'); 
+        
+        // 2. MOSTRAR HAMBURGUESA
+        const ham = document.getElementById('hamburger-btn');
+        if(ham) {
+            ham.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        // 3. MOSTRAR TUERCA
+        const settingsBtn = document.querySelector('button[onclick="toggleSettings()"].fixed');
+        if(settingsBtn) {
+            settingsBtn.classList.remove('opacity-0', 'pointer-events-none');
+        }
+    }
+
     function submitForm() { document.getElementById('cvForm').submit(); setTimeout(closeModal, 1500); }
     
     function resetDefaults() {
@@ -274,7 +325,7 @@
         photoCol.style.visibility = showPhoto ? 'visible' : 'hidden';
 
         // Toggles
-        ['experiencia', 'educacion', 'reconocimientos', 'proyectos', 'venta'].forEach(sec => {
+        ['experiencia', 'educacion', 'reconocimientos', 'proyectos', 'venta', 'productos_academicos'].forEach(sec => {
             const chk = document.querySelector(`input[name="${sec}"]`);
             const div = document.getElementById(`prev_sec_${sec}`);
             if(div && chk) div.style.display = chk.checked ? 'block' : 'none';

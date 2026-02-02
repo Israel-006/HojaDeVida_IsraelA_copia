@@ -251,13 +251,23 @@
 
         <ul id="nav-list" class="w-full space-y-4 flex-grow overflow-y-auto custom-scrollbar px-8 scroll-smooth flex flex-col py-4">
             {% with request.resolver_match.url_name as url_name %}
+            
             <li><a href="{% url 'inicio' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'inicio' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Inicio</span></a></li>
+            
             <li><a href="{% url 'experiencia' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'experiencia' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Experiencia</span></a></li>
+            
             <li><a href="{% url 'educacion' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'educacion' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Educación</span></a></li>
+            
             <li><a href="{% url 'cursos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'cursos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Cursos</span></a></li>
+            
             <li><a href="{% url 'reconocimientos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'reconocimientos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Logros</span></a></li>
+            
             <li><a href="{% url 'trabajos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'trabajos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Trabajos</span></a></li>
+            
+            <li><a href="{% url 'productos_academicos' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'productos_academicos' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Investigación</span></a></li>
+            
             <li><a href="{% url 'venta' %}" class="flex items-center justify-center h-12 rounded-xl transition-all duration-300 {% if url_name == 'venta' %}text-gray-900 font-black scale-110{% else %}text-gray-500 hover:text-[#5A7D84] hover:scale-105{% endif %}"><span class="font-bold text-sm uppercase tracking-[0.2em]">Venta</span></a></li>
+            
             {% endwith %}
         </ul>
         

@@ -4,9 +4,9 @@ from django.utils import timezone
 import cloudinary.utils
 from django.core.validators import FileExtensionValidator
 
-# ==========================================
-# 1. DATOS PERSONALES (Con lógica de privacidad)
-# ==========================================
+# ============================================== #
+# 1. DATOS PERSONALES (Con lógica de privacidad) #
+# ============================================== #
 class DatosPersonales(models.Model):
     SEXO_CHOICES = [
         ('Mujer', 'Mujer'),
@@ -23,14 +23,14 @@ class DatosPersonales(models.Model):
     ]
 
     # Identidad Básica
-    cedula = models.CharField(max_length=13, verbose_name="Cédula / ID")
+    cedula = models.CharField(max_length=13, verbose_name="Cédula / ID", unique=True)
     nombres = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
     sexo = models.CharField(max_length=20, choices=SEXO_CHOICES)
     estado_civil = models.CharField(max_length=30, choices=ESTADO_CIVIL_CHOICES)
     
     # Origen y Fecha
-    nacionalidad = models.CharField(max_length=50, default="Ecuatoriana")
+    nacionalidad = models.CharField(max_length=50, default="Ecuatoriano")
     lugar_nacimiento = models.CharField(max_length=100, default="No especificado")
     fecha_nacimiento = models.DateField(null=True, blank=True)
     
@@ -64,11 +64,17 @@ class DatosPersonales(models.Model):
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos}"
+    
+    # 2. MODIFICACIÓN: Agregamos este método para validar la fecha
+    def clean(self):
+        # Validar que la fecha de nacimiento no sea futura
+        if self.fecha_nacimiento and self.fecha_nacimiento > timezone.now().date():
+            raise ValidationError({'fecha_nacimiento': 'No puedes nacer en el futuro.'})
 
 
-# ==========================================
-# 2. EXPERIENCIA (Con validación de fechas)
-# ==========================================
+# ========================================= #
+# 2. EXPERIENCIA (Con validación de fechas) #
+# ========================================= #
 class ExperienciaLaboral(models.Model):
     cargo = models.CharField(max_length=150, default="Cargo no especificado")
     empresa = models.CharField(max_length=150, default="Empresa no especificada")
@@ -77,39 +83,73 @@ class ExperienciaLaboral(models.Model):
     fecha_fin = models.DateField(null=True, blank=True, help_text="Dejar en blanco si es el trabajo actual")
     descripcion = models.TextField(default="Sin descripción de funciones")
     ubicacion = models.CharField(max_length=100, default="Ubicación no especificada")
+    email_empresa = models.EmailField(max_length=100, null=True, blank=True, verbose_name="Email Empresa")
+    sitio_web_empresa = models.URLField(max_length=100, null=True, blank=True, verbose_name="Sitio Web")
+    nombre_contacto = models.CharField(max_length=100, null=True, blank=True, verbose_name="Nombre Contacto")
+    telefono_contacto = models.CharField(max_length=60, null=True, blank=True, verbose_name="Teléfono Contacto")
     
     # Switch de visibilidad
     visible = models.BooleanField(default=True, verbose_name="Mostrar en CV")
 
+    certificado = models.FileField(
+        upload_to='experiencia/certificados/', 
+        null=True, 
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
+        verbose_name="Certificado Laboral (PDF)"
+    )
+
     class Meta:
         verbose_name_plural = "Experiencias Laborales"
-        ordering = ['-fecha_inicio'] # Ordenar del más reciente al más antiguo
+        ordering = ['-fecha_inicio']
 
     def clean(self):
-        # LÓGICA IMPORTADA: Validar que no haya fechas imposibles
+        # Obtenemos la fecha de hoy para comparar
+        hoy = timezone.now().date()
+
+        # 1. Restricción: Fecha Fin no puede ser menor a Fecha Inicio
         if self.fecha_fin and self.fecha_inicio and self.fecha_fin < self.fecha_inicio:
-            raise ValidationError({'fecha_fin': 'La fecha de fin no puede ser anterior a la de inicio.'})
+            raise ValidationError({
+                'fecha_fin': 'Error: La fecha de finalización no puede ser antes de haber empezado.'
+            })
+
+        # 2. Restricción: Fecha Fin no puede ser futura (Nadie termina un trabajo mañana)
+        if self.fecha_fin and self.fecha_fin > hoy:
+            raise ValidationError({
+                'fecha_fin': 'Error: La fecha de finalización no puede ser una fecha futura.'
+            })
+
+        # 3. (Opcional pero recomendada) Fecha Inicio tampoco debería ser futura
+        if self.fecha_inicio and self.fecha_inicio > hoy:
+             raise ValidationError({
+                'fecha_inicio': 'Error: La fecha de inicio no puede estar en el futuro.'
+            })
 
     def __str__(self):
         estado = " (Actual)" if not self.fecha_fin else ""
         return f"{self.cargo} en {self.empresa}{estado}"
 
 
-# ==========================================
-# 3. ESTUDIOS (Con lógica de fechas)
-# ==========================================
+# ================================== #
+# 3. ESTUDIOS (Con lógica de fechas) #
+# ================================== #
 class EstudioRealizado(models.Model):
     titulo = models.CharField(max_length=200)
     institucion = models.CharField(max_length=200)
+    descripcion = models.TextField(null=True, blank=True, verbose_name="Descripción / Logros")
     # ADAPTACIÓN: Cambiado a DateField
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField(null=True, blank=True, help_text="Dejar vacío si sigues estudiando")
-    certificado_pdf = models.FileField(
-        upload_to='educacion/certificados/', 
+    archivo = models.FileField(
+        upload_to='proyectos/archivos/', 
         null=True, 
         blank=True,
-        help_text="Sube aquí el diploma o certificado en formato PDF"
+        # Aquí definimos las extensiones permitidas:
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png'])],
+        help_text="Sube documentación o capturas (Formatos permitidos: PDF, JPG, JPEG, PNG)",
+        verbose_name="Archivo o Evidencia"
     )
+    
     visible = models.BooleanField(default=True)
 
     class Meta:
@@ -117,69 +157,98 @@ class EstudioRealizado(models.Model):
         ordering = ['-fecha_fin']
 
     def clean(self):
+        hoy = timezone.now().date()
+        
+        # 1. Validación: Fecha Fin no futura
+        if self.fecha_fin and self.fecha_fin > hoy:
+            raise ValidationError({'fecha_fin': 'La fecha de graduación no puede ser futura.'})
+
+        # 2. Validación: Coherencia de fechas
         if self.fecha_fin and self.fecha_inicio and self.fecha_fin < self.fecha_inicio:
-            raise ValidationError("La fecha de graduación no puede ser anterior al inicio.")
+            raise ValidationError({'fecha_fin': 'La fecha de graduación no puede ser anterior al inicio.'})
 
     def __str__(self):
         return self.titulo
 
 
-# ==========================================
-# 4. CURSOS (Simplificado pero ordenado)
-# ==========================================
+# ====================================== #
+# 4. CURSOS (Simplificado pero ordenado) #
+# ====================================== #
 
 class CursoCapacitacion(models.Model):
     nombre_curso = models.CharField(max_length=200)
     institucion = models.CharField(max_length=200)
     horas = models.PositiveIntegerField(help_text="Cantidad de horas académicas") # Cambiado a número para poder sumar totales si quisieras
-    fecha_realizacion = models.DateField(default=timezone.now) # Agregado para ordenar
+    fecha_inicio = models.DateField(default=timezone.now, verbose_name="Fecha Inicio")
+    fecha_fin = models.DateField(default=timezone.now, verbose_name="Fecha Fin")
+    descripcion = models.TextField(null=True, blank=True, verbose_name="Descripción del Curso")
+    nombre_contacto = models.CharField(max_length=100, null=True, blank=True, verbose_name="Nombre Contacto (Auspicia)")
+    telefono_contacto = models.CharField(max_length=60, null=True, blank=True, verbose_name="Teléfono Contacto")
+    email_empresa = models.CharField(max_length=60, null=True, blank=True, verbose_name="Email Empresa Patrocinadora")
+    # --- CERTIFICADO (Restricción: Solo PDF) ---
     certificado_pdf = models.FileField(
         upload_to='cursos/certificados/', 
         null=True, 
         blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
         help_text="Sube el certificado del curso en formato PDF"
     )
     visible = models.BooleanField(default=True)
     class Meta:
         verbose_name_plural = "Cursos y Formaciones"
-        ordering = ['-fecha_realizacion']
+        ordering = ['-fecha_fin'] # Ordenamos por fecha de finalización
+
+    def clean(self):
+        hoy = timezone.now().date()
+
+        # 1. RESTRICCIÓN: Fecha Fin no puede ser futura
+        if self.fecha_fin and self.fecha_fin > hoy:
+            raise ValidationError({'fecha_fin': 'La fecha de finalización no puede ser una fecha futura.'})
+
+        # 2. RESTRICCIÓN: Coherencia temporal (Inicio vs Fin)
+        if self.fecha_inicio and self.fecha_fin:
+            if self.fecha_inicio > self.fecha_fin:
+                raise ValidationError({
+                    'fecha_inicio': 'La fecha de inicio no puede ser mayor a la fecha de fin.',
+                    'fecha_fin': 'La fecha de fin no puede ser menor a la de inicio.'
+                })
 
     def __str__(self):
         return self.nombre_curso
+
+    # --- Vista Previa (Sin cambios, para que siga funcionando tu admin) ---
     @property
     def get_preview_url(self):
         if self.certificado_pdf and hasattr(self.certificado_pdf, 'name'):
             try:
-                # Cloudinary necesita el 'public_id' (el nombre del archivo en la nube)
-                # Al usar FileField, 'self.certificado_pdf.name' suele tener ese valor.
-                
-                # Generamos una URL limpia solicitando formato JPG
                 url, options = cloudinary.utils.cloudinary_url(
                     self.certificado_pdf.name,
-                    resource_type="image", # Forzamos a que lo trate como imagen
-                    format="jpg"           # Lo convertimos a JPG
+                    resource_type="image", 
+                    format="jpg"           
                 )
                 return url
-            except Exception as e:
-                print(f"Error generando preview: {e}")
-                # Si falla, intentamos devolver la URL original como fallback
+            except Exception:
                 return self.certificado_pdf.url
         return None
 
 
-# ==========================================
-# 5. RECONOCIMIENTOS
-# ==========================================
+# ================== #
+# 5. RECONOCIMIENTOS #
+# ================== #
 class Reconocimiento(models.Model):
     nombre = models.CharField(max_length=200, default="Reconocimiento no especificado")
     institucion = models.CharField(max_length=200, default="Institución no especificada")
     fecha = models.DateField(default=timezone.now) 
     codigo_registro = models.CharField(max_length=50, blank=True, default="")
+    descripcion = models.TextField(null=True, blank=True, verbose_name="Descripción del Reconocimiento")
+    nombre_contacto = models.CharField(max_length=100, null=True, blank=True, verbose_name="Nombre Contacto Auspicia")
+    telefono_contacto = models.CharField(max_length=60, null=True, blank=True, verbose_name="Teléfono Contacto Auspicia")
     
     certificado_pdf = models.FileField(
         upload_to='reconocimientos/certificados/', 
         null=True, 
         blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
         help_text="Sube el diploma o certificado en formato PDF"
     )
     
@@ -189,43 +258,47 @@ class Reconocimiento(models.Model):
         verbose_name_plural = "Reconocimientos y Premios"
         ordering = ['-fecha']
 
+    def clean(self):
+        # 3. RESTRICCIÓN: Fecha no futura
+        if self.fecha and self.fecha > timezone.now().date():
+            raise ValidationError({'fecha': 'La fecha del reconocimiento no puede ser una fecha futura.'})
+
     def __str__(self):
         return self.nombre
-
-    # --- AGREGAR ESTO PARA QUE FUNCIONE LA VISTA PREVIA IGUAL QUE EN CURSOS ---
+    
+    # Propiedad para vista previa (se mantiene igual para que funcione tu admin)
     @property
     def get_preview_url(self):
         if self.certificado_pdf and hasattr(self.certificado_pdf, 'name'):
             try:
-                # Generamos una URL limpia solicitando formato JPG a Cloudinary
                 url, options = cloudinary.utils.cloudinary_url(
                     self.certificado_pdf.name,
                     resource_type="image", 
                     format="jpg"           
                 )
                 return url
-            except Exception as e:
+            except Exception:
                 return self.certificado_pdf.url
         return None
 
 
-# ==========================================
-# 6. PRODUCTOS / PROYECTOS
-# ==========================================
+# ======================== #
+# 6. PRODUCTOS / PROYECTOS #
+# ======================== #
 class ProductoLaboral(models.Model):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField()
     fecha = models.DateField(default=timezone.now)
-    registro_id = models.CharField(max_length=50, blank=True, null=True)
     
-    # --- AQUÍ ESTÁ EL CAMBIO ---
+    # 2. RESTRICCIÓN DE ARCHIVOS (PDF + Imágenes)
     archivo = models.FileField(
         upload_to='proyectos/archivos/', 
         null=True, 
         blank=True,
-        # Agregamos el validador para restringir a solo PDF:
-        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
-        help_text="Documentación del proyecto (Solo archivos PDF)"
+        # Aquí definimos las extensiones permitidas:
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png'])],
+        help_text="Sube documentación o capturas (Formatos permitidos: PDF, JPG, JPEG, PNG)",
+        verbose_name="Archivo o Evidencia"
     )
     
     url_demo = models.URLField(null=True, blank=True, help_text="Link al proyecto en vivo si existe")
@@ -235,13 +308,18 @@ class ProductoLaboral(models.Model):
         verbose_name_plural = "Productos Laborales"
         ordering = ['-fecha']
 
+    def clean(self):
+        # 3. RESTRICCIÓN DE FECHA FUTURA
+        if self.fecha and self.fecha > timezone.now().date():
+            raise ValidationError({'fecha': 'La fecha del proyecto no puede ser futura.'})
+
     def __str__(self):
         return self.nombre
 
 
-# ==========================================
-# 7. VENTA DE GARAGE (Con validación de precio)
-# ==========================================
+# ============================================= #
+# 7. VENTA DE GARAGE (Con validación de precio) #
+# ============================================= #
 class VentaGarage(models.Model):
     ESTADO_CHOICES = [
         ('Nuevo', 'Nuevo'), 
@@ -264,10 +342,40 @@ class VentaGarage(models.Model):
 
     class Meta:
         verbose_name_plural = "Venta de Garage"
+        ordering = ['-fecha_publicacion'] # Ordenamos del más reciente al más antiguo
 
     def clean(self):
-        if self.precio < 0:
-            raise ValidationError("El precio no puede ser negativo.")
+        # 1. Validación de Precio
+        if self.precio is not None and self.precio < 0:
+            raise ValidationError({'precio': 'El precio no puede ser negativo.'})
+
+        # 2. Validación de Fecha Futura (NUEVA)
+        if self.fecha_publicacion and self.fecha_publicacion > timezone.now():
+            raise ValidationError({'fecha_publicacion': 'La fecha de publicación no puede ser futura.'})
 
     def __str__(self):
         return f"{self.nombre_producto} (${self.precio})"
+    
+
+
+# ======================= #
+# 8. PRODUCTOS ACADÉMICOS #
+# ======================= #
+class ProductoAcademico(models.Model):
+    # Basado en 'nombrerecurso'
+    nombre = models.CharField(max_length=100, verbose_name="Nombre del Recurso")
+    
+    # Basado en 'clasificador'
+    clasificador = models.CharField(max_length=100, verbose_name="Clasificador / Categoría")
+    
+    # Basado en 'descripcion' (Le puse TextField por si necesitas escribir más de 100 letras)
+    descripcion = models.TextField(verbose_name="Descripción", max_length=500)
+    
+    # Basado en 'activarparaqueseveaenfront'
+    visible = models.BooleanField(default=True, verbose_name="Mostrar en CV")
+
+    class Meta:
+        verbose_name_plural = "Productos Académicos"
+
+    def __str__(self):
+        return self.nombre

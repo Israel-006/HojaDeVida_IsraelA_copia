@@ -129,8 +129,28 @@
     {% endif %}
 
     {% if section_mode == 'bottom' %}
+        
         {% if reconocimientos %}<div class="section-header"><div class="section-title">Reconocimientos</div></div>{% for rec in reconocimientos %}<table class="item-row"><tr><td width="75%"><div class="item-title">{{ rec.nombre }}</div><div class="item-subtitle">{{ rec.institucion }}</div></td><td width="25%" align="right"><div class="date-badge">{{ rec.fecha|date:"Y" }}</div></td></tr></table>{% endfor %}{% endif %}
+        
+        {% if academicos %}
+        <div class="section-header"><div class="section-title">Investigación y Publicaciones</div></div>
+        {% for item in academicos %}
+        <table class="item-row">
+            <tr>
+                <td width="85%">
+                    <div class="item-title">{{ item.nombre }}</div>
+                    <div class="item-subtitle" style="color:{{ styles.accent_color }};">{{ item.clasificador }}</div>
+                </td>
+                <td width="15%"></td>
+            </tr>
+            <tr>
+                <td colspan="2"><div class="description">{{ item.descripcion }}</div></td>
+            </tr>
+        </table>
+        {% endfor %}
+        {% endif %}
         {% if proyectos %}<div class="section-header"><div class="section-title">Proyectos</div></div>{% for pro in proyectos %}<table class="item-row"><tr><td width="75%"><div class="item-title">{{ pro.nombre }}</div></td><td width="25%" align="right"><div class="date-badge">{{ pro.fecha|date:"Y" }}</div></td></tr><tr><td colspan="2"><div class="description">{{ pro.descripcion|linebreaksbr }}</div></td></tr></table>{% endfor %}{% endif %}
+        
         {% if ventas %}<div class="section-header"><div class="section-title">Catálogo Venta</div></div>{% for item in ventas %}<table class="item-row"><tr><td width="70%"><div class="item-title">{{ item.nombre_producto }}</div><div class="description">{{ item.descripcion }}</div></td><td width="30%" align="right"><div style="font-size:11pt; font-weight:bold; color:{{ styles.accent_color }};">${{ item.precio }}</div></td></tr></table>{% endfor %}{% endif %}
     {% endif %}
 

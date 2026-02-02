@@ -9,7 +9,7 @@ from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
 from .models import (
     DatosPersonales, ExperienciaLaboral, EstudioRealizado, 
-    CursoCapacitacion, Reconocimiento, ProductoLaboral, VentaGarage
+    CursoCapacitacion, Reconocimiento, ProductoLaboral, VentaGarage, ProductoAcademico
 )
 from pypdf import PdfWriter, PdfReader
 from reportlab.pdfgen import canvas
@@ -83,30 +83,52 @@ def venta(request):
     return render(request, 'curriculum/venta.html', {'perfil': DatosPersonales.objects.first(), 'servicios': VentaGarage.objects.all().order_by('-fecha_publicacion')})
 def contacto(request):
     return render(request, 'curriculum/contacto.html', {'perfil': DatosPersonales.objects.first()})
+def productos_academicos(request):
+    return render(request, 'curriculum/productos_academicos.html', {
+        'perfil': DatosPersonales.objects.first(),
+        'productos_academicos': ProductoAcademico.objects.filter(visible=True)
+    })
 
 # ==========================================
 # GENERADOR PDF
 # ==========================================
 def generar_cv(request):
     perfil = DatosPersonales.objects.first()
-    styles = get_cv_styles(request) # Obtenemos estilos
+    styles = get_cv_styles(request)
 
-    # Filtros
+    # 1. CAPTURAR FILTROS (Aquí estaba el fallo, faltaban varios)
     origen = request.GET.get('origen')
-    incluir_exp = request.GET.get('experiencia') == 'on' if origen == 'personalizado' else True
-    incluir_edu = request.GET.get('educacion') == 'on' if origen == 'personalizado' else True
-    incluir_rec = request.GET.get('reconocimientos') == 'on' if origen == 'personalizado' else True
-    incluir_pro = request.GET.get('proyectos') == 'on' if origen == 'personalizado' else True
-    incluir_ven = request.GET.get('venta') == 'on' if origen == 'personalizado' else True
+    is_custom = (origen == 'personalizado') # Variable auxiliar para limpieza
 
-    # Datos
-    experiencias = ExperienciaLaboral.objects.filter(visible=True) if incluir_exp else []
-    estudios = EstudioRealizado.objects.filter(visible=True) if incluir_edu else []
-    cursos_lista = CursoCapacitacion.objects.filter(visible=True).order_by('-fecha_realizacion') if incluir_edu else []
+    # Si es personalizado, leemos el checkbox. Si no, asumimos True (mostrar todo).
+    incluir_exp = request.GET.get('experiencia') == 'on' if is_custom else True
+    incluir_edu = request.GET.get('educacion') == 'on' if is_custom else True
+    
+    # --- NUEVOS FILTROS CORREGIDOS ---
+    incluir_rec = request.GET.get('reconocimientos') == 'on' if is_custom else True
+    incluir_pro = request.GET.get('proyectos') == 'on' if is_custom else True
+    incluir_ven = request.GET.get('venta') == 'on' if is_custom else True
+    incluir_aca = request.GET.get('productos_academicos') == 'on' if is_custom else True
+    
+    # 2. CONSULTAS A BASE DE DATOS (Condicionadas)
+    # Si la variable 'incluir_X' es False, pasamos una lista vacía []
+    
+    experiencias = ExperienciaLaboral.objects.filter(visible=True).order_by('-fecha_inicio') if incluir_exp else []
+    
+    estudios = EstudioRealizado.objects.filter(visible=True).order_by('-fecha_fin') if incluir_edu else []
+    
+    # Nota: Los cursos suelen ir atados a la educación, mantenemos esa lógica
+    cursos_lista = CursoCapacitacion.objects.filter(visible=True).order_by('-fecha_fin') if incluir_edu else []
+    
     reconocimientos = Reconocimiento.objects.filter(visible=True).order_by('-fecha') if incluir_rec else []
-    proyectos = ProductoLaboral.objects.filter(visible=True) if incluir_pro else []
+    
+    proyectos = ProductoLaboral.objects.filter(visible=True).order_by('-fecha') if incluir_pro else []
+    
     ventas = VentaGarage.objects.filter(activo=True).order_by('-fecha_publicacion') if incluir_ven else []
+    
+    academicos = ProductoAcademico.objects.filter(visible=True) if incluir_aca else []
 
+    # 3. GENERACIÓN DEL PDF
     pdf_writer = PdfWriter()
     template = get_template('curriculum/cv_pdf.html') 
 
@@ -119,17 +141,31 @@ def generar_cv(request):
         buf.seek(0)
         for p in PdfReader(buf).pages: pdf_writer.add_page(p)
 
-    # 1. Principal
-    render_part('top', {'experiencias': experiencias, 'estudios': estudios})
-    # 2. Cursos
-    if cursos_lista: render_part('courses_list', {'cursos': cursos_lista})
-    # 3. Otros
-    if reconocimientos or proyectos or ventas: render_part('bottom', {'reconocimientos': reconocimientos, 'proyectos': proyectos, 'ventas': ventas})
-    # 4. Índice
+    # PARTE A: Experiencia y Estudios
+    if incluir_exp or incluir_edu:
+        render_part('top', {'experiencias': experiencias, 'estudios': estudios})
+    else:
+        # Si no hay exp ni edu, renderizamos solo cabecera (top) con listas vacías
+        render_part('top', {'experiencias': [], 'estudios': []})
+    
+    # PARTE B: Cursos
+    if cursos_lista: 
+        render_part('courses_list', {'cursos': cursos_lista})
+    
+    # PARTE C: Otros Bloques (Ahora respetarán si las listas están vacías)
+    if reconocimientos or proyectos or ventas or academicos: 
+        render_part('bottom', {
+            'reconocimientos': reconocimientos, 
+            'proyectos': proyectos, 
+            'ventas': ventas,
+            'academicos': academicos
+        })
+        
+    # PARTE D: Índice de Anexos
     if any(c.certificado_pdf for c in cursos_lista) or any(r.certificado_pdf for r in reconocimientos):
         render_part('certificates_index', {'cursos': cursos_lista, 'reconocimientos': reconocimientos})
 
-    # 5. Adjuntar PDFs
+    # PARTE E: Adjuntar PDFs
     for item in list(cursos_lista) + list(reconocimientos):
         if item.certificado_pdf:
             try:
@@ -140,7 +176,7 @@ def generar_cv(request):
                     for p in PdfReader(BytesIO(res.content)).pages: pdf_writer.add_page(p)
             except: pass
 
-    # 6. Finalizar
+    # Finalizar
     try: final_writer = numerar_paginas(pdf_writer)
     except: final_writer = pdf_writer
     
