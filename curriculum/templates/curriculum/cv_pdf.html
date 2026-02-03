@@ -155,10 +155,87 @@
     {% endif %}
 
     {% if section_mode == 'certificates_index' %}
-        <div class="section-header"><div class="section-title">Anexo: Documentación</div></div>
-        <table style="margin-left: 15px;">
-            {% for curso in cursos %}{% if curso.certificado_pdf %}<tr><td width="5%" style="color:{{ styles.accent_color }};">•</td><td width="95%"><div style="font-weight:bold;">Certificado: {{ curso.nombre_curso }}</div></td></tr>{% endif %}{% endfor %}
-            {% for rec in reconocimientos %}{% if rec.certificado_pdf %}<tr><td width="5%" style="color:#D4AF37;">★</td><td width="95%"><div style="font-weight:bold;">Premio: {{ rec.nombre }}</div></td></tr>{% endif %}{% endfor %}
+        <div class="section-header"><div class="section-title">Anexo: Documentación de Respaldo</div></div>
+        
+        <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+            
+            <thead>
+                <tr>
+                    <td style="width: 65%; padding-bottom: 8px; border-bottom: 2px solid #ccc; font-weight:bold; font-size:8pt; color:#888; text-transform:uppercase; letter-spacing: 1px;">
+                        Detalle / Item
+                    </td>
+                    <td style="width: 35%; padding-bottom: 8px; border-bottom: 2px solid #ccc; font-weight:bold; font-size:8pt; color:#888; text-transform:uppercase; letter-spacing: 1px; text-align: right;">
+                        Estado del Certificado
+                    </td>
+                </tr>
+            </thead>
+
+            {% if experiencias %}
+                <tr>
+                    <td colspan="2" style="padding-top:15px; padding-bottom:5px; font-weight:bold; color:#1a1a1a; font-size:10pt; text-transform:uppercase;">
+                        Experiencia Laboral
+                    </td>
+                </tr>
+                {% for exp in experiencias %}
+                <tr>
+                    <td style="padding: 6px 0; color: #333; font-size: 10pt; border-bottom: 1px dotted #eee;">
+                        {{ exp.cargo }} <span style="color:#666; font-size:9pt;">en {{ exp.empresa }}</span>
+                    </td>
+                    <td style="padding: 6px 0; text-align: right; vertical-align: middle; border-bottom: 1px dotted #eee;">
+                        {% if exp.certificado %}
+                            <span style="color:{{ styles.accent_color }}; font-weight:bold; font-size: 9pt;">✓ Certificado Adjunto</span>
+                        {% else %}
+                            <span style="color:#bbb; font-size: 9pt;">(No disponible)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+
+            {% if cursos %}
+                <tr>
+                    <td colspan="2" style="padding-top:20px; padding-bottom:5px; font-weight:bold; color:#1a1a1a; font-size:10pt; text-transform:uppercase;">
+                        Cursos y Capacitaciones
+                    </td>
+                </tr>
+                {% for curso in cursos %}
+                <tr>
+                    <td style="padding: 6px 0; color: #333; font-size: 10pt; border-bottom: 1px dotted #eee;">
+                        {{ curso.nombre_curso }}
+                    </td>
+                    <td style="padding: 6px 0; text-align: right; vertical-align: middle; border-bottom: 1px dotted #eee;">
+                        {% if curso.certificado_pdf %}
+                            <span style="color:{{ styles.accent_color }}; font-weight:bold; font-size: 9pt;">✓ Certificado Adjunto</span>
+                        {% else %}
+                            <span style="color:#bbb; font-size: 9pt;">(No disponible)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+
+            {% if reconocimientos %}
+                <tr>
+                    <td colspan="2" style="padding-top:20px; padding-bottom:5px; font-weight:bold; color:#1a1a1a; font-size:10pt; text-transform:uppercase;">
+                        Reconocimientos
+                    </td>
+                </tr>
+                {% for rec in reconocimientos %}
+                <tr>
+                    <td style="padding: 6px 0; color: #333; font-size: 10pt; border-bottom: 1px dotted #eee;">
+                        {{ rec.nombre }}
+                    </td>
+                    <td style="padding: 6px 0; text-align: right; vertical-align: middle; border-bottom: 1px dotted #eee;">
+                        {% if rec.certificado_pdf %}
+                            <span style="color:{{ styles.accent_color }}; font-weight:bold; font-size: 9pt;">✓ Certificado Adjunto</span>
+                        {% else %}
+                            <span style="color:#bbb; font-size: 9pt;">(No disponible)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+
         </table>
     {% endif %}
 </body>

@@ -162,20 +162,33 @@ def generar_cv(request):
         })
         
     # PARTE D: Índice de Anexos
-    if any(c.certificado_pdf for c in cursos_lista) or any(r.certificado_pdf for r in reconocimientos):
-        render_part('certificates_index', {'cursos': cursos_lista, 'reconocimientos': reconocimientos})
 
+    if experiencias or cursos_lista or reconocimientos:
+        render_part('certificates_index', {
+            'cursos': cursos_lista, 
+            'reconocimientos': reconocimientos,
+            'experiencias': experiencias
+        })
     # PARTE E: Adjuntar PDFs
-    for item in list(cursos_lista) + list(reconocimientos):
-        if item.certificado_pdf:
+    # Unimos todas las listas que pueden tener PDFs
+    todos_los_items = list(experiencias) + list(cursos_lista) + list(reconocimientos)
+
+    for item in todos_los_items:
+        # Detectamos el campo dinámicamente:
+        # 1. Intenta buscar 'certificado_pdf' (Cursos/Reconocimientos)
+        # 2. Si no, intenta buscar 'certificado' (Experiencia)
+        archivo = getattr(item, 'certificado_pdf', getattr(item, 'certificado', None))
+
+        if archivo:
             try:
-                url = item.certificado_pdf.url
+                url = archivo.url
                 if not url.startswith('http'): url = request.build_absolute_uri(url)
                 res = requests.get(url, timeout=15)
                 if res.status_code == 200:
                     for p in PdfReader(BytesIO(res.content)).pages: pdf_writer.add_page(p)
-            except: pass
-
+            except Exception as e:
+                print(f"Error adjuntando PDF: {e}")
+                pass
     # Finalizar
     try: final_writer = numerar_paginas(pdf_writer)
     except: final_writer = pdf_writer
